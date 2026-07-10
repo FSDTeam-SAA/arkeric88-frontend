@@ -1,0 +1,6 @@
+import Image from "next/image";
+import Link from "next/link";
+
+export function FooterSection() {
+  return <footer id="footer"><div className="footer-grid"><div className="footer-brand"><Image src="/images/logo.png" alt="Velari" width={100} height={34} /><p>Discover the destinations your soul truly needs. Velari combines emotional intelligence, zodiac insights, and cutting-edge AI to craft personalized luxury travel experiences designed around you.</p></div><div><h3>Platform</h3><Link href="#home">Home</Link><Link href="#how-it-works">How It Works</Link><Link href="#journeys">Pricing</Link></div><div><h3>Legal</h3><Link href="#footer">Privacy Policy</Link><Link href="#footer">Terms of Service</Link><Link href="#footer">Cookie Policy</Link></div><div><h3>Contact Us</h3><p>4140 Parker Rd. Allentown,<br />New Mexico 31134</p><p>+1 (555) 123-4567</p><p>help@velari.com</p></div><div><h3>Social</h3><div className="socials"><Link href="#footer" aria-label="X">𝕏</Link><Link href="#footer" aria-label="Facebook">f</Link><Link href="#footer" aria-label="Instagram">◎</Link><Link href="#footer" aria-label="LinkedIn">in</Link></div></div></div><div className="copyright"><span>@2026 VelariAI. All rights reserved.</span><span>Privacy Policy • Terms &amp; Conditions</span></div></footer>;
+}
