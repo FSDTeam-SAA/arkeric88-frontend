@@ -12,19 +12,22 @@ const testimonials = [
 
 export function TestimonialsSection() {
   const [active, setActive] = useState(1);
-  const change = (direction: number) => setActive((current) => (current + direction + testimonials.length) % testimonials.length);
+  const showPrevious = () => setActive((current) => (current - 1 + testimonials.length) % testimonials.length);
+  const showNext = () => setActive((current) => (current + 1) % testimonials.length);
   const testimonial = testimonials[active];
 
   return (
-    <section className="testimonials" aria-labelledby="testimonials-title">
+    <section className="testimonials" aria-labelledby="testimonials-title" data-reveal>
       <h2 id="testimonials-title">Testimonials</h2>
       <div className="avatar-stack">
         {testimonials.map((item, index) => <button type="button" onClick={() => setActive(index)} className={index === active ? "active" : ""} key={item.name} aria-label={`Show ${item.name}'s testimonial`} aria-pressed={index === active}><Image src={item.image} alt="" fill sizes="56px" /></button>)}
       </div>
-      <button className="testimonial-arrow left" type="button" onClick={() => change(-1)} aria-label="Previous testimonial"><ArrowLeft /></button>
-      <blockquote>“{testimonial.quote}”</blockquote>
-      <button className="testimonial-arrow right" type="button" onClick={() => change(1)} aria-label="Next testimonial"><ArrowRight /></button>
-      <div className="reviewer"><strong>{testimonial.name}</strong><small>{testimonial.trip}</small><div aria-label="5 out of 5 stars">★★★★★</div></div>
+      <button className="testimonial-arrow left" type="button" onClick={showPrevious} aria-label="Previous testimonial"><ArrowLeft /></button>
+      <div className="testimonial-content" key={testimonial.name} aria-live="polite">
+        <blockquote>“{testimonial.quote}”</blockquote>
+        <div className="reviewer"><strong>{testimonial.name}</strong><small>{testimonial.trip}</small><div aria-label="5 out of 5 stars">★★★★★</div></div>
+      </div>
+      <button className="testimonial-arrow right" type="button" onClick={showNext} aria-label="Next testimonial"><ArrowRight /></button>
     </section>
   );
 }

@@ -4,16 +4,18 @@ import { JourneysSection } from "./sections/JourneysSection";
 import { NavbarSection } from "./sections/NavbarSection";
 import { ProcessSection } from "./sections/ProcessSection";
 import { TestimonialsSection } from "./sections/TestimonialsSection";
+import { ScrollReveal } from "@/components/shared/ScrollReveal";
 
 export function LandingPage() {
   return (
     <main>
+      <ScrollReveal />
       <NavbarSection />
       <HeroSection />
-      <ProcessSection />
-      <JourneysSection />
+      <div data-reveal><ProcessSection /></div>
+      <div data-reveal><JourneysSection /></div>
       <TestimonialsSection />
-      <FooterSection />
+      <div data-reveal><FooterSection /></div>
     </main>
   );
 }
