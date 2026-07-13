@@ -19,7 +19,7 @@ export function NavbarSection({ activePage = "home", accountMode = false }: Navb
 
   return (
     <header className="navbar">
-      <Link href="/" className="logo-panel" aria-label="Velari home"><Image src="/images/logo.png" alt="Velari" width={133} height={44} className="logo" priority /></Link>
+      <Link href="/" className="logo-panel" aria-label="Velari home"><Image src="/images/logo.png" alt="Velari" width={180} height={59} className="logo" priority /></Link>
       <nav className={menuOpen ? "nav-links open" : "nav-links"} aria-label="Main navigation">
         <Link href="/" className={activePage === "home" ? "active" : ""} onClick={closeMenu}>Home</Link><Link href="/how-it-works" className={activePage === "how-it-works" ? "active" : ""} onClick={closeMenu}>How It Works</Link>
       </nav>

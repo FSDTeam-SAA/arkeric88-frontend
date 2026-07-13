@@ -51,12 +51,12 @@ blockquote {
   justify-content: center;
 }
 .logo {
-  width: 156px;
-  height: 50px;
+  width: 180px;
+  height: 59px;
   object-fit: contain;
   object-position: left center;
-  filter: contrast(1.18) saturate(1.12)
-    drop-shadow(0 2px 2px rgba(0, 0, 0, 0.2));
+  filter: contrast(1.35) saturate(1.3)
+    drop-shadow(0 2px 3px rgba(55, 42, 25, 0.32));
 }
 .nav-links {
   position: absolute;
@@ -596,8 +596,12 @@ footer {
   max-width: 310px;
   margin-top: 16px;
 }
-.footer-brand img {
+.footer-brand .footer-logo {
+  width: 170px;
+  height: auto;
   object-fit: contain;
+  filter: contrast(1.35) saturate(1.3)
+    drop-shadow(0 2px 3px rgba(55, 42, 25, 0.32));
 }
 .socials {
   display: flex;
@@ -855,8 +859,8 @@ footer {
     height: 64px;
   }
   .logo {
-    width: 130px;
-    height: 44px;
+    width: 145px;
+    height: 48px;
   }
   .nav-links.open {
     top: 64px;
