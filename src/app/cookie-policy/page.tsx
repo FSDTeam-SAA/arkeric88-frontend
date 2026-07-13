@@ -1,0 +1,1 @@
+import { LegalPage } from "@/components/legal/LegalPage"; export default function Page(){ return <LegalPage title="Cookie Policy"><p>Velari uses essential cookies for authentication, security, and session continuity. Optional analytics cookies may be used to improve the experience.</p><p>You can control non-essential cookies through your browser settings.</p></LegalPage>; }

@@ -1,0 +1,1 @@
+import { LegalPage } from "@/components/legal/LegalPage"; export default function Page(){ return <LegalPage title="Terms of Service"><p>By using Velari, you agree to provide accurate account and journey information and to use the platform lawfully.</p><p>Travel recommendations are informational and should be verified with the relevant providers before booking.</p></LegalPage>; }
