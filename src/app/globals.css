@@ -17,7 +17,8 @@ body {
   margin: 0;
   color: var(--ink);
   background: var(--cream);
-  font-family: var(--font-poppins), Poppins, Arial, sans-serif;
+  font-family: var(--font-cormorant-garamond), "Cormorant Garamond", Georgia, serif;
+  font-size-adjust: 0.5;
 }
 a {
   color: inherit;
@@ -29,7 +30,7 @@ button {
 h1,
 h2,
 blockquote {
-  font-family: var(--font-serif), Georgia, serif;
+  font-family: inherit;
   font-weight: 500;
 }
 
@@ -433,7 +434,7 @@ blockquote {
   font-size: 12px;
 }
 .place-overlay h3 {
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-weight: 500;
   font-size: 29px;
   margin: 2px 0 10px;
@@ -687,14 +688,14 @@ footer {
 .how-step-number {
   display: block;
   color: #c8b7a8;
-  font-family: var(--font-serif), Georgia, serif;
+  font-family: inherit;
   font-weight: 600;
   font-size: 35px;
   line-height: 1;
 }
 .how-step-copy h2 {
   margin: 12px 0 12px;
-  font-family: var(--font-serif), Georgia, serif;
+  font-family: inherit;
   font-weight: 500;
   font-size: clamp(30px, 3vw, 39px);
   line-height: 1.08;
@@ -1227,7 +1228,7 @@ footer {
 }
 .payment-card h2 {
   margin: 0 0 22px;
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-size: 27px;
 }
 .payment-close {
@@ -1373,7 +1374,7 @@ footer {
 }
 .matched > h2 {
   margin: 0;
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-weight: 500;
   font-size: clamp(38px, 4vw, 52px);
 }
@@ -1432,7 +1433,7 @@ footer {
 }
 .match-copy h3 {
   margin: 0;
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-size: 25px;
   font-weight: 500;
 }
@@ -1547,7 +1548,7 @@ footer {
 }
 .day-plan > h2 {
   margin: 30px 0 0;
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-size: 36px;
   font-weight: 500;
 }
