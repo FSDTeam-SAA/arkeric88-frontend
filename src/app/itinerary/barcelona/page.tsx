@@ -1,2 +1,5 @@
-import { ItineraryPage } from "@/components/journey/ItineraryPage";
-export default function Page() { return <ItineraryPage />; }
+import { redirect } from "next/navigation";
+
+export default function Page() {
+  redirect("/journey");
+}

@@ -15,6 +15,7 @@ import { signOut, useSession } from 'next-auth/react'
 import { toast } from 'sonner'
 import { NavbarSection } from '@/components/landing/sections/NavbarSection'
 import { FooterSection } from '@/components/landing/sections/FooterSection'
+import { Skeleton } from '@/components/ui/skeleton'
 
 type AccountSection = 'history' | 'personal' | 'password'
 type Profile = {
@@ -32,7 +33,11 @@ type HistoryRow = {
   _id: string
   selectedCity?: string
   preferredDestinations?: string
-  userProfile?: { tripLengthDays?: number }
+  userProfile?: { tripLengthDays?: number; budget?: number }
+  paymentAmount?: number
+  paymentStatus?: string
+  aiAnalysisStatus?: 'pending' | 'suggested_cities_ready' | 'completed' | 'failed'
+  createdAt?: string
   suggestedCities?: {
     cityName?: string
     countryName?: string
@@ -143,12 +148,20 @@ function SearchHistory() {
     <div className="history-panel">
       <div className="history-table">
         <div className="history-row head">
+          <span>Destination</span>
           <span>Country</span>
           <span>Trip Length</span>
+          <span>Budget</span>
+          <span>Status</span>
+          <span>Created</span>
           <span>Action</span>
         </div>
         {loading ? (
-          <p className="empty-history">Loading history...</p>
+          <div className="history-skeleton" aria-label="Loading journey history">
+            {Array.from({ length: 5 }, (_, rowIndex) => <div className="history-row history-skeleton-row" key={rowIndex} aria-hidden="true">
+              {Array.from({ length: 7 }, (_, columnIndex) => <Skeleton className={`history-skeleton-cell cell-${columnIndex}`} key={columnIndex} />)}
+            </div>)}
+          </div>
         ) : rows.length ? (
           rows.map(row => {
             const city =
@@ -159,10 +172,22 @@ function SearchHistory() {
             const days =
               row.userProfile?.tripLengthDays ||
               row.suggestedCities?.[0]?.numberOfDays
+            const matchingCity = row.suggestedCities?.find(item => item.cityName === city) || row.suggestedCities?.[0]
+            const country = matchingCity?.countryName || '—'
+            const budget = row.userProfile?.budget
+            const status = row.aiAnalysisStatus || (row.paymentStatus === 'paid' ? 'completed' : 'pending')
+            const statusLabel = status === 'suggested_cities_ready' ? 'Matches ready' : status.charAt(0).toUpperCase() + status.slice(1)
+            const created = row.createdAt
+              ? new Intl.DateTimeFormat('en-US', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(row.createdAt))
+              : '—'
             return (
               <div className="history-row" key={row._id}>
-                <span>{city}</span>
+                <span className="history-destination">{city}</span>
+                <span>{country}</span>
                 <span>{days ? `${days} days` : '—'}</span>
+                <span>{budget != null ? `$${budget.toLocaleString('en-US')}` : '—'}</span>
+                <span><i className={`history-status ${status}`}>{statusLabel}</i></span>
+                <span>{created}</span>
                 <span className="history-actions">
                   <Link
                     href={`/results?historyId=${row._id}`}
@@ -187,7 +212,7 @@ function SearchHistory() {
       </div>
       <div className="history-meta">
         <span>
-          Showing {rows.length} result{rows.length === 1 ? '' : 's'}
+          {loading ? 'Loading results…' : `Showing ${rows.length} result${rows.length === 1 ? '' : 's'}`}
         </span>
       </div>
     </div>
@@ -225,7 +250,7 @@ function PersonalInformation() {
     }
   }
   if (loading)
-    return <div className="account-card">Loading your profile...</div>
+    return <PersonalInformationSkeleton />
   return (
     <form className="account-card" onSubmit={submit}>
       <div className="account-card-heading">
@@ -297,6 +322,40 @@ function PersonalInformation() {
         </button>
       </div>
     </form>
+  )
+}
+
+function PersonalInformationSkeleton() {
+  const fields = [
+    { key: 'name' },
+    { key: 'email' },
+    { key: 'phone' },
+    { key: 'city' },
+    { key: 'bio', full: true, tall: true },
+    { key: 'address', full: true },
+    { key: 'country' },
+    { key: 'postcode' },
+  ]
+
+  return (
+    <div className="account-card profile-skeleton" aria-label="Loading your personal information" aria-busy="true">
+      <div className="profile-skeleton-heading">
+        <Skeleton className="profile-skeleton-title" />
+        <Skeleton className="profile-skeleton-subtitle" />
+      </div>
+      <div className="profile-skeleton-gender">
+        <Skeleton /><Skeleton />
+      </div>
+      <div className="form-grid">
+        {fields.map(field => <div className={`profile-skeleton-field${field.full ? ' full' : ''}`} key={field.key}>
+          <Skeleton className="profile-skeleton-label" />
+          <Skeleton className={field.tall ? 'profile-skeleton-input tall' : 'profile-skeleton-input'} />
+        </div>)}
+      </div>
+      <div className="profile-skeleton-actions">
+        <Skeleton /><Skeleton />
+      </div>
+    </div>
   )
 }
 
