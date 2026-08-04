@@ -16,6 +16,8 @@ import { toast } from 'sonner'
 import { NavbarSection } from '@/components/landing/sections/NavbarSection'
 import { FooterSection } from '@/components/landing/sections/FooterSection'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useRef } from 'react'
+import { Camera } from 'lucide-react'
 
 type AccountSection = 'history' | 'personal' | 'password'
 type Profile = {
@@ -28,6 +30,7 @@ type Profile = {
   city?: string
   country?: string
   postcode?: string
+  profilePicture?: string
 }
 type HistoryRow = {
   _id: string
@@ -224,6 +227,8 @@ function PersonalInformation() {
   const [profile, setProfile] = useState<Profile>({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [photoPreview, setPhotoPreview] = useState<string | undefined>()
+  const fileInputRef = useRef<HTMLInputElement>(null)
   useEffect(() => {
     if (!token) return
     apiRequest('/user/profile', token)
@@ -231,6 +236,20 @@ function PersonalInformation() {
       .catch(error => toast.error(error.message))
       .finally(() => setLoading(false))
   }, [token])
+  const pickPhoto = () => fileInputRef.current?.click()
+  const onPhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please choose an image file')
+      return
+    }
+    setPhotoPreview(URL.createObjectURL(file))
+  }
+  const removePhoto = () => {
+    setPhotoPreview(undefined)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!token) return
@@ -242,6 +261,8 @@ function PersonalInformation() {
         body: data,
       })
       setProfile(result.data)
+      setPhotoPreview(undefined)
+      if (fileInputRef.current) fileInputRef.current.value = ''
       toast.success('Profile updated successfully')
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Update failed')
@@ -251,11 +272,47 @@ function PersonalInformation() {
   }
   if (loading)
     return <PersonalInformationSkeleton />
+  const displayPhoto = photoPreview || profile.profilePicture
   return (
     <form className="account-card" onSubmit={submit}>
       <div className="account-card-heading">
         <h1>Personal Information</h1>
         <p>Manage your personal information and profile details.</p>
+      </div>
+      <div className="profile-photo">
+        <div className="profile-photo-avatar">
+          {displayPhoto ? (
+            <img src={displayPhoto} alt="Profile" />
+          ) : (
+            <UserRound size={30} />
+          )}
+          <button
+            type="button"
+            className="profile-photo-edit"
+            onClick={pickPhoto}
+            aria-label="Upload profile picture"
+          >
+            <Camera size={16} />
+          </button>
+        </div>
+        <div className="profile-photo-actions">
+          <button type="button" className="photo-change" onClick={pickPhoto}>
+            Change Photo
+          </button>
+          {displayPhoto && (
+            <button type="button" className="photo-remove" onClick={removePhoto}>
+              <Trash2 size={14} /> Remove
+            </button>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            name="profilePicture"
+            accept="image/*"
+            className="photo-input"
+            onChange={onPhotoChange}
+          />
+        </div>
       </div>
       <div className="gender-row">
         <label>
@@ -342,6 +399,13 @@ function PersonalInformationSkeleton() {
       <div className="profile-skeleton-heading">
         <Skeleton className="profile-skeleton-title" />
         <Skeleton className="profile-skeleton-subtitle" />
+      </div>
+      <div className="profile-photo">
+        <Skeleton className="profile-skeleton-avatar" />
+        <div className="profile-photo-actions">
+          <Skeleton className="profile-skeleton-photo-btn" />
+          <Skeleton className="profile-skeleton-photo-btn" />
+        </div>
       </div>
       <div className="profile-skeleton-gender">
         <Skeleton /><Skeleton />
