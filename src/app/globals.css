@@ -142,6 +142,15 @@ blockquote {
   place-items: center;
 }
 .account-button svg { width: 22px; height: 22px; }
+.account-button .account-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.account-button:has(.account-avatar) {
+  border-color: transparent;
+}
 
 /* Account */
 .account-page { min-height: 100vh; background: var(--cream); }
@@ -344,6 +353,74 @@ blockquote {
 .pagination { display: flex; gap: 8px; }
 .pagination button { width: 34px; height: 34px; border: 1px solid #aaa99f; border-radius: 3px; background: transparent; color: #65635e; cursor: pointer; }
 .pagination button.active { background: var(--olive); border-color: var(--olive); color: white; }
+.pagination button:disabled { opacity: 0.45; cursor: default; }
+.pagination-ellipsis { width: 34px; height: 34px; display: grid; place-items: center; color: #65635e; }
+.history-meta .pagination { flex-wrap: wrap; justify-content: flex-end; }
+.logout-backdrop {
+  position: fixed;
+  z-index: 40;
+  inset: 0;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(34, 34, 31, 0.48);
+  backdrop-filter: blur(7px);
+}
+.logout-card {
+  width: min(420px, 100%);
+  padding: 34px 32px 28px;
+  position: relative;
+  text-align: center;
+  border-radius: 13px;
+  background: #f8f4ed;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
+}
+.logout-card h2 {
+  margin: 0 0 10px;
+  font-family: inherit;
+  font-size: 27px;
+}
+.logout-card > p {
+  margin: 0 auto;
+  color: #706e68;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.logout-close {
+  position: absolute;
+  top: 10px;
+  right: 16px;
+  border: 0;
+  background: none;
+  font-size: 25px;
+  cursor: pointer;
+}
+.logout-actions {
+  margin-top: 26px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+.logout-actions button {
+  min-width: 112px;
+  height: 42px;
+  padding: 0 20px;
+  border-radius: 5px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.logout-cancel {
+  border: 1px solid #c5c3bc;
+  color: #65635e;
+  background: transparent;
+}
+.logout-confirm {
+  border: 1px solid var(--olive);
+  background: var(--olive);
+  color: white;
+}
 .password-card { padding: 38px 48px 30px; }
 .password-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
 .password-field.confirm { grid-column: 1 / 2; }
@@ -2308,9 +2385,10 @@ footer {
   padding: 18px;
   border-radius: 7px;
   background: #e7ded3;
+  overflow: visible;
 }
 .travel-notes h3 { margin: 0 0 5px; }
-.travel-notes p { margin: 0; color: #66645f; font-size: 13px; line-height: 1.5; }
+.travel-notes p { margin: 0; color: #66645f; font-size: 13px; line-height: 1.5; word-wrap: break-word; overflow-wrap: break-word; }
 .itinerary-hero-skeleton { height: 415px; }
 .itinerary-aside-skeleton { min-height: 300px; background: #e7ded3 !important; }
 .itinerary-aside-skeleton i { height: 13px; margin: 11px 0; border-radius: 4px; }

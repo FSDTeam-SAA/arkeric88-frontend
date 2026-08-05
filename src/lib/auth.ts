@@ -29,15 +29,15 @@ export const authOptions: NextAuthOptions = {
         const { user, accessToken } = result.data || {};
         if (!user?._id || !user?.email || !accessToken) throw new Error("Invalid authentication response");
         if (user.status === "suspended") throw new Error("Your account is suspended");
-        return { id: user._id, name: user.fullName, email: user.email, role: user.role || "user", accessToken };
+        return { id: user._id, name: user.fullName, email: user.email, role: user.role || "user", accessToken, profilePicture: user.profilePicture };
       } catch (error) { if (error instanceof Error) throw error; throw new Error("Unable to connect to the authentication server"); }
     },
   })],
   pages: { signIn: "/login" },
   callbacks: {
-    async jwt({ token, user }) { if (user) { token.id = user.id; token.name = user.name; token.email = user.email; token.role = user.role; token.accessToken = user.accessToken; } return token; },
+    async jwt({ token, user, trigger, session }) { if (user) { token.id = user.id; token.name = user.name; token.email = user.email; token.role = user.role; token.accessToken = user.accessToken; token.profilePicture = user.profilePicture; } if (trigger === "update" && session) { if (typeof session.profilePicture === "string") token.profilePicture = session.profilePicture; } return token; },
     async session({ session, token }) {
-      session.user = { ...session.user, id: token.id, name: token.name, email: token.email, role: token.role, accessToken: token.accessToken };
+      session.user = { ...session.user, id: token.id, name: token.name, email: token.email, role: token.role, accessToken: token.accessToken, profilePicture: token.profilePicture };
       return session;
     },
   },
