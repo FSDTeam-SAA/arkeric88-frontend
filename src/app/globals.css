@@ -105,6 +105,28 @@ blockquote {
 }
 .login {
   font-size: 15px;
+  position: relative;
+  padding: 6px 2px;
+  transition: color 0.2s;
+}
+.login::after {
+  content: '';
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--olive);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s ease;
+}
+.login:hover {
+  color: #46513f;
+}
+.login:hover::after {
+  transform: scaleX(1);
 }
 .cta {
   background: var(--olive);
@@ -455,7 +477,6 @@ blockquote {
   .form-actions button { min-width: 0; flex: 1; }
   .profile-skeleton-actions { gap: 10px; }
   .profile-skeleton-actions > div { width: auto; flex: 1; }
-  .nav-actions .account-button { display: none; }
 }
 
 .hero {
@@ -1006,7 +1027,6 @@ footer {
 }
 
 @media (max-width: 950px) {
-  .nav-actions .login,
   .nav-actions .cta {
     display: none;
   }
@@ -1071,6 +1091,12 @@ footer {
   .navbar-container {
     padding: 8px 18px;
   }
+  .nav-actions {
+    gap: 20px;
+  }
+  .menu-button {
+    margin-left: 14px;
+  }
   .logo {
     width: 145px;
     height: 48px;
@@ -1088,13 +1114,14 @@ footer {
     height: calc(100svh - 64px);
   }
   .hero h1 {
-    font-size: 49px;
+    font-size: clamp(40px, 12.5vw, 49px);
     letter-spacing: -1px;
   }
   .hero-content > p {
     font-size: 12px;
   }
   .hero h2 {
+    font-size: clamp(14px, 4.4vw, 16px);
     line-height: 1.45;
   }
   .hero-features {
@@ -1113,10 +1140,13 @@ footer {
   .section-heading h2,
   .journey-heading h2,
   .testimonials h2 {
-    font-size: 36px;
+    font-size: clamp(30px, 9.5vw, 36px);
   }
   .section-heading p {
     font-size: 15px;
+  }
+  .journey-heading p {
+    font-size: 14px;
   }
   .steps {
     grid-template-columns: 1fr;
@@ -1134,14 +1164,20 @@ footer {
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     padding-bottom: 12px;
+    scrollbar-width: none;
   }
+  .places::-webkit-scrollbar { display: none; }
   .place-card {
-    flex: 0 0 84vw;
+    flex: 0 0 86vw;
+    height: 340px;
     scroll-snap-align: start;
+  }
+  .place-overlay h3 {
+    font-size: 26px;
   }
   .testimonials {
     min-height: 720px;
-    padding: 68px 18px;
+    padding: 68px 18px 96px;
   }
   .avatar-stack {
     height: 58px;
@@ -1156,24 +1192,27 @@ footer {
     transform: scale(1.28);
   }
   .testimonials blockquote {
-    min-height: 310px;
-    font-size: 27px;
-    line-height: 1.22;
-    padding: 0 25px;
+    min-height: 230px;
+    font-size: clamp(23px, 7vw, 27px);
+    line-height: 1.28;
+    padding: 0 16px;
   }
   .testimonial-arrow {
     width: 40px;
     height: 40px;
-    top: 53%;
+    top: auto;
+    bottom: 46px;
   }
   .testimonial-arrow svg {
     width: 19px;
   }
   .testimonial-arrow.left {
-    left: 2px;
+    left: calc(50% - 44px);
+    right: auto;
   }
   .testimonial-arrow.right {
-    right: 2px;
+    right: calc(50% - 44px);
+    left: auto;
   }
   footer {
     padding: 60px 24px 24px;
@@ -1197,7 +1236,7 @@ footer {
     height: 540px;
   }
   .how-hero h1 {
-    font-size: 46px;
+    font-size: clamp(38px, 12vw, 46px);
   }
   .how-hero p {
     font-size: 15px;
@@ -1225,7 +1264,7 @@ footer {
     text-align: left;
   }
   .how-step-copy h2 {
-    font-size: 32px;
+    font-size: clamp(27px, 8.5vw, 32px);
   }
   .how-step-image {
     height: 230px;
@@ -2481,6 +2520,7 @@ footer {
   .timeline-activity-image { width: 100%; min-height: 175px; }
   .result-tags {
     gap: 6px;
+    flex-wrap: wrap;
   }
   .result-tags span {
     padding-inline: 10px;
@@ -2778,5 +2818,170 @@ footer {
   }
   .legal-section-body {
     font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-container {
+    padding: 8px 14px;
+  }
+  .logo {
+    width: 130px;
+    height: 44px;
+  }
+  .nav-links.open {
+    padding: 22px 18px;
+  }
+  .hero {
+    min-height: 520px;
+  }
+  .hero-content > p {
+    font-size: 11px;
+  }
+  .hero h1 {
+    font-size: clamp(34px, 11vw, 40px);
+    letter-spacing: -0.5px;
+  }
+  .hero h2 {
+    margin: 10px 0 22px;
+  }
+  .hero-features {
+    gap: 6px;
+    font-size: 12px;
+  }
+  .process,
+  .journeys {
+    padding: 52px 16px;
+  }
+  .section-heading {
+    margin-bottom: 28px;
+  }
+  .section-heading h2,
+  .journey-heading h2,
+  .testimonials h2 {
+    font-size: clamp(26px, 8.5vw, 30px);
+  }
+  .section-heading p,
+  .journey-heading p {
+    font-size: 14px;
+  }
+  .step-card {
+    min-height: 0;
+    padding: 22px 16px;
+  }
+  .places {
+    padding-bottom: 8px;
+  }
+  .place-card {
+    flex-basis: 88vw;
+    height: 300px;
+  }
+  .place-overlay h3 {
+    font-size: 24px;
+  }
+  .testimonials {
+    min-height: 680px;
+    padding: 56px 14px 88px;
+  }
+  .avatar-stack {
+    margin: 28px 0;
+  }
+  .testimonials blockquote {
+    min-height: 250px;
+    font-size: clamp(21px, 6.5vw, 23px);
+    padding: 0 4px;
+  }
+  .reviewer {
+    margin-top: 26px;
+  }
+  .testimonial-arrow {
+    width: 38px;
+    height: 38px;
+    bottom: 40px;
+  }
+  .testimonial-arrow.left {
+    left: calc(50% - 42px);
+  }
+  .testimonial-arrow.right {
+    right: calc(50% - 42px);
+  }
+  footer {
+    padding: 48px 18px 22px;
+  }
+  .footer-grid {
+    gap: 30px 18px;
+  }
+  .how-hero {
+    height: 480px;
+  }
+  .how-steps {
+    padding: 52px 16px 24px;
+  }
+  .how-step,
+  .how-step.reverse {
+    margin-bottom: 54px;
+    gap: 20px;
+  }
+  .how-step-number {
+    font-size: 30px;
+  }
+  .how-step-image {
+    height: 200px;
+  }
+  .quiz-stage {
+    padding: 16px 16px 28px;
+  }
+  .quiz-copy h1 {
+    font-size: 26px;
+  }
+  .quiz-cards {
+    grid-template-columns: 1fr;
+  }
+  .quiz-cards button {
+    padding: 9px 12px;
+  }
+  .results-hero {
+    height: 440px;
+  }
+  .results-hero h1 {
+    font-size: 34px;
+  }
+  .result-tags {
+    flex-wrap: wrap;
+  }
+  .matched {
+    padding: 60px 16px 70px;
+  }
+  .matched > h2 {
+    font-size: 32px;
+  }
+  .match-image {
+    height: 220px;
+  }
+  .match-copy {
+    min-height: 0;
+  }
+  .match-copy h3 {
+    font-size: 22px;
+  }
+  .itinerary-hero {
+    height: 360px;
+  }
+  .itinerary-layout {
+    padding: 0 16px;
+    margin-top: 40px;
+    margin-bottom: 70px;
+  }
+  .itinerary-title h1 {
+    font-size: 34px;
+  }
+  .itinerary-title p {
+    font-size: 13px;
+  }
+  .timeline-activity-image {
+    min-height: 160px;
+  }
+  .travel-notes article {
+    padding: 16px;
   }
 }
