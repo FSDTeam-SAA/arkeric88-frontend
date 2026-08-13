@@ -11,13 +11,12 @@ type ApiEnvelope<T> = {
 };
 
 export type QuestionnaireAnswers = {
-  todays_feeling: string;
-  experience_kind: string;
+  selected_archetype: import("@/lib/wellness-archetypes").WellnessArchetypeId;
+  archetype_answers: Record<string, string>;
   energy_level: string;
   travel_style: string;
   trip_organization: string;
   activity_restrictions: string[];
-  life_season: string;
   preferred_environments: string[];
   birthdate: string;
   total_trip_budget: number;
@@ -54,6 +53,8 @@ export type JourneyHistory = {
   travelThemes?: string[];
   astroInsight?: string;
   userProfile?: {
+    wellnessArchetype?: string;
+    wellnessNeeds?: string[];
     zodiacSign?: string;
     currentEnergy?: string;
     emotionalState?: string;

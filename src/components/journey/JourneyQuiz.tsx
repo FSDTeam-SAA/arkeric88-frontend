@@ -40,34 +40,18 @@ import {
   PaymentIntentData,
   QuestionnaireAnswers,
 } from "@/lib/journey-api";
+import {
+  archetypeQuestionKeys,
+  getQuizQuestions,
+  getWellnessArchetype,
+  isWellnessArchetypeId,
+  wellnessArchetypes,
+} from "@/lib/wellness-archetypes";
 
 type Answer = string | string[];
-type Question = {
-  key: string;
-  title: string;
-  prompt?: string;
-  kind?: "options" | "cards" | "date" | "range" | "text";
-  options?: string[];
-  multiple?: boolean;
-};
-
-const questions: Question[] = [
-  { key: "todays_feeling", title: "How are you feeling today?", options: ["Overwhelmed", "Calm", "Stressed", "Adventurous", "Inspired", "Other"] },
-  { key: "experience_kind", title: "What kind of experience is\ncalling to you?", options: ["Deep Rest", "Inner Peace", "Celebration", "Exploration", "Escape", "Spiritual"] },
-  { key: "energy_level", title: "What's your energy like\nfor this trip?", options: ["Low", "Medium", "High"] },
-  { key: "travel_style", title: "How do you want to\nexperience this journey?", kind: "cards", options: ["Solo|Just me and my thoughts", "Couple|An intimate shared experience", "Small Group|2–6 close companions", "Family|Travel with loved ones"] },
-  { key: "trip_organization", title: "How would you like your\ntrip to be organized?", options: ["Loosely planned", "Well Planned", "Hour by hour"] },
-  { key: "activity_restrictions", title: "Are there any activities\nyou'd like to avoid or can't\ndo?", kind: "cards", multiple: true, options: ["Intense hiking or climbing", "Extreme heat or cold", "High-impact physical activity", "Water activities", "Long drives or transport", "No limitations"] },
-  { key: "life_season", title: "Which word best describes the\nseason you're in right now?", options: ["Building", "Healing", "Transitioning", "Celebrating", "Reflecting", "Reinventing"] },
-  { key: "preferred_environments", title: "What environment speaks to\nyour soul?", multiple: true, options: ["Mountains", "Nature", "Ocean", "Beach", "City", "Culture", "Countryside", "Farmland", "Desert", "Snow", "Warm Weather", "Cold Weather"] },
-  { key: "birthdate", title: "Your Birthdate", kind: "date" },
-  { key: "total_trip_budget", title: "Your Trip Budget", prompt: "Approximate total trip budget?", kind: "range" },
-  { key: "trip_length_days", title: "Your Trip length", prompt: "How many days are you planning to travel?", options: ["1–3 days", "4–7 days", "1–2 weeks", "2+ weeks"] },
-  { key: "hope_of_this_trip", title: "What do you hope this\ntrip gives you?", prompt: "Write freely... there are no wrong answers.", kind: "text" },
-];
-
 const optionIcons = [Sparkles, Droplets, CircleGauge, Star, User, MapPin];
 const draftKey = "velari-journey-draft";
+const draftVersion = 2;
 
 function tripLengthToDays(value: string) {
   return ({ "1–3 days": 3, "4–7 days": 7, "1–2 weeks": 14, "2+ weeks": 21 } as Record<string, number>)[value] || 0;
@@ -180,6 +164,8 @@ export function JourneyQuiz() {
   const [paymentError, setPaymentError] = useState("");
   const [intent, setIntent] = useState<PaymentIntentData | null>(null);
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
+  const questions = useMemo(() => getQuizQuestions(answers.selected_archetype), [answers.selected_archetype]);
+  const totalQuestions = questions.length + (isWellnessArchetypeId(answers.selected_archetype) ? 0 : wellnessArchetypes[0].questions.length);
   const q = questions[step];
 
   useEffect(() => {
@@ -187,10 +173,16 @@ export function JourneyQuiz() {
     if (!raw) return;
     try {
       const draft = JSON.parse(raw);
+      if (draft.version !== draftVersion || !isWellnessArchetypeId(draft.answers?.selected_archetype)) {
+        localStorage.removeItem(draftKey);
+        return;
+      }
       if (draft.answers) setAnswers(draft.answers);
       if (draft.budget) setBudget(draft.budget);
       if (draft.birthdate) setBirthdate(draft.birthdate);
-      if (Number.isInteger(draft.step)) setStep(Math.min(draft.step, questions.length - 1));
+      if (Number.isInteger(draft.step)) {
+        setStep(Math.min(draft.step, getQuizQuestions(draft.answers.selected_archetype).length - 1));
+      }
     } catch {
       localStorage.removeItem(draftKey);
     }
@@ -203,12 +195,18 @@ export function JourneyQuiz() {
   }, [router, status]);
 
   const saveDraft = useCallback(() => {
-    localStorage.setItem(draftKey, JSON.stringify({ answers, budget, birthdate, step }));
+    localStorage.setItem(draftKey, JSON.stringify({ version: draftVersion, answers, budget, birthdate, step }));
   }, [answers, birthdate, budget, step]);
 
   const selectAnswer = (value: string) => {
     setValidationError("");
     setAnswers((current) => {
+      if (q.key === "selected_archetype") {
+        const withoutPreviousBranch = Object.fromEntries(
+          Object.entries(current).filter(([key]) => !archetypeQuestionKeys.has(key)),
+        );
+        return { ...withoutPreviousBranch, selected_archetype: value };
+      }
       if (!q.multiple) return { ...current, [q.key]: value };
       const selected = Array.isArray(current[q.key]) ? current[q.key] as string[] : [];
       if (value === "No limitations") return { ...current, [q.key]: [value] };
@@ -243,13 +241,19 @@ export function JourneyQuiz() {
   };
 
   const questionnaire = useMemo<QuestionnaireAnswers>(() => ({
-    todays_feeling: String(answers.todays_feeling || ""),
-    experience_kind: String(answers.experience_kind || ""),
+    selected_archetype: isWellnessArchetypeId(answers.selected_archetype)
+      ? answers.selected_archetype
+      : "burned_out_achiever",
+    archetype_answers: Object.fromEntries(
+      (getWellnessArchetype(answers.selected_archetype)?.questions || []).map((question) => [
+        question.key,
+        String(answers[question.key] || ""),
+      ]),
+    ),
     energy_level: String(answers.energy_level || ""),
     travel_style: String(answers.travel_style || "").replace("|", " (") + (String(answers.travel_style || "").includes("|") ? ")" : ""),
     trip_organization: String(answers.trip_organization || ""),
     activity_restrictions: Array.isArray(answers.activity_restrictions) ? answers.activity_restrictions : [],
-    life_season: String(answers.life_season || ""),
     preferred_environments: Array.isArray(answers.preferred_environments) ? answers.preferred_environments : [],
     birthdate: `${birthdate.year}-${birthdate.month.padStart(2, "0")}-${birthdate.day.padStart(2, "0")}`,
     total_trip_budget: budget,
@@ -283,7 +287,9 @@ export function JourneyQuiz() {
           email: session?.user?.email,
           quiz: questions.map((question) => ({
             question: question.title.replaceAll("\n", " "),
-            answer: question.key === "total_trip_budget"
+            answer: question.key === "selected_archetype"
+              ? getWellnessArchetype(answers.selected_archetype)?.name || ""
+              : question.key === "total_trip_budget"
               ? String(budget)
               : question.key === "birthdate"
                 ? questionnaire.birthdate
@@ -302,7 +308,7 @@ export function JourneyQuiz() {
     } finally {
       setPaymentLoading(false);
     }
-  }, [answers, budget, questionnaire, session?.user?.email, session?.user?.name, token]);
+  }, [answers, budget, questionnaire, questions, session?.user?.email, session?.user?.name, token]);
 
   const continueJourney = () => {
     setValidationError("");
@@ -328,12 +334,13 @@ export function JourneyQuiz() {
       <Image src="/images/logo.png" alt="Velari" width={125} height={44} priority />
       <button onClick={saveAndExit}>Save &amp; Exit</button>
     </header>
-    <div className="quiz-progress" aria-hidden="true"><span style={{ width: `${((step + 1) / questions.length) * 100}%` }} /></div>
+    <div className="quiz-progress" aria-hidden="true"><span style={{ width: `${((step + 1) / totalQuestions) * 100}%` }} /></div>
     <section className="quiz-stage" key={step}>
       <div className="quiz-copy">
-        <small>QUESTION {step + 1} of {questions.length}{q.multiple ? " · SELECT ALL THAT APPLY" : ""}</small>
+        <small>QUESTION {step + 1} of {totalQuestions}{q.multiple ? " · SELECT ALL THAT APPLY" : ""}</small>
         <h1>{q.title.split("\n").map((line) => <span key={line}>{line}<br /></span>)}</h1>
         {q.prompt && <p>{q.prompt}</p>}
+        {q.kind === "archetypes" && <div className="archetype-grid">{wellnessArchetypes.map((archetype, i) => { const Icon = optionIcons[i % optionIcons.length]; return <button type="button" key={archetype.id} className={isSelected(archetype.id) ? "selected" : ""} aria-pressed={isSelected(archetype.id)} onClick={() => selectAnswer(archetype.id)}><span className="archetype-icon"><Icon size={18} /></span><span><strong>{archetype.name}</strong><small>{archetype.description}</small></span></button>; })}</div>}
         {(!q.kind || q.kind === "options") && <div className={`quiz-options ${q.options!.length > 7 ? "wide" : ""}`}>
           {q.options!.map((option, i) => { const Icon = optionIcons[i % optionIcons.length]; return <button type="button" key={option} className={isSelected(option) ? "selected" : ""} aria-pressed={isSelected(option)} onClick={() => selectAnswer(option)}><Icon size={14} />{option}</button>; })}
         </div>}

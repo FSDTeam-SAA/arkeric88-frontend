@@ -1,4 +1,5 @@
 import type { JourneyHistory } from "@/lib/journey-api";
+import { jsPDF } from "jspdf";
 
 const olive = [94, 103, 85] as const;
 const ink = [41, 40, 36] as const;
@@ -19,7 +20,6 @@ function safeFilename(value: string) {
 }
 
 export async function downloadItineraryPdf(history: JourneyHistory, city: string, country?: string) {
-  const { jsPDF } = await import("jspdf");
   const doc = new jsPDF({ unit: "mm", format: "a4", compress: true });
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();

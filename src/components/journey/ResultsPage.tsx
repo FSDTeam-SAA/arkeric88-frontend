@@ -24,7 +24,7 @@ const fallbackImages = ["/images/place-1.jpg", "/images/place-2.jpg", "/images/p
 
 const analysisSteps = [
   { title: "Verifying payment", detail: "Confirming your secure checkout", icon: CreditCard },
-  { title: "Understanding you", detail: "Reading your mood, energy and travel style", icon: UserRound },
+  { title: "Understanding you", detail: "Reading your archetype, needs and travel style", icon: UserRound },
   { title: "Comparing destinations", detail: "Balancing pace, budget and preferences", icon: SlidersHorizontal },
   { title: "Curating your matches", detail: "Selecting the journeys that fit you best", icon: MapPin },
 ];
@@ -228,7 +228,7 @@ export function ResultsPage() {
   if (!history || !history.suggestedCities?.length) return <ResultsState title="No destinations found" message="The analysis completed, but no matching destinations were returned. Try a new journey with a few different preferences." notFound />;
 
   const profile = history.userProfile;
-  const archetype = profile?.seeking || `${profile?.emotionalState || "Mindful"} ${profile?.travelStyle || "traveler"}`;
+  const archetype = profile?.wellnessArchetype || profile?.seeking || `${profile?.emotionalState || "Mindful"} ${profile?.travelStyle || "traveler"}`;
   const heroDescription = history.astroInsight || `A journey designed for your ${profile?.currentEnergy || "current"} energy, ${profile?.preferredPace?.replace("_", " ") || "natural"} pace, and the experiences your soul is seeking now.`;
   const tags = (history.travelThemes || []).slice(0, 3);
 

@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { FooterSection } from "@/components/landing/sections/FooterSection";
 import { NavbarSection } from "@/components/landing/sections/NavbarSection";
 import { ApiError, journeyApi, JourneyHistory } from "@/lib/journey-api";
+import { downloadItineraryPdf } from "@/lib/itinerary-pdf";
 
 function ItinerarySkeleton() {
   return <main className="itinerary-page"><NavbarSection activePage="none" /><div className="itinerary-hero itinerary-hero-skeleton" /><section className="itinerary-layout"><aside className="itinerary-aside-skeleton"><i /><i /><i /><i /></aside><div className="itinerary-content-skeleton"><i /><i /><i /><i /></div></section></main>;
@@ -72,7 +73,6 @@ export function ItineraryPage({ historyId }: { historyId?: string }) {
     if (downloadingPdf) return;
     setDownloadingPdf(true);
     try {
-      const { downloadItineraryPdf } = await import("@/lib/itinerary-pdf");
       await downloadItineraryPdf(history, city, cityMatch?.countryName);
       toast.success("Your complete itinerary PDF has been downloaded.");
     } catch {

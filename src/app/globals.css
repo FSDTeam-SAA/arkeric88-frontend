@@ -1341,6 +1341,7 @@ footer {
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow-y: auto;
   animation: quiz-in 0.35s ease both;
 }
 .quiz-copy {
@@ -1375,6 +1376,63 @@ footer {
 }
 .quiz-options.wide {
   max-width: 680px;
+}
+.archetype-grid {
+  width: min(860px, 100%);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.archetype-grid button {
+  min-height: 112px;
+  padding: 17px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border: 1px solid #aaa99d;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #54574f;
+  text-align: left;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+.archetype-grid button:hover,
+.archetype-grid button.selected {
+  color: white;
+  background: var(--olive);
+  border-color: var(--olive);
+  box-shadow: 0 10px 25px rgba(79, 88, 72, 0.14);
+  transform: translateY(-2px);
+}
+.archetype-grid button > span:last-child,
+.archetype-grid button strong,
+.archetype-grid button small {
+  display: block;
+}
+.archetype-grid button strong {
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+.archetype-grid button small {
+  color: inherit;
+  font-size: 10px;
+  line-height: 1.45;
+  opacity: 0.82;
+}
+.archetype-icon {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(94, 103, 85, 0.1);
+}
+.archetype-grid button:hover .archetype-icon,
+.archetype-grid button.selected .archetype-icon {
+  background: rgba(255, 255, 255, 0.14);
 }
 .quiz-options button,
 .quiz-cards button {
@@ -2585,6 +2643,9 @@ footer {
     padding: 7px 13px;
     font-size: 12px;
   }
+  .archetype-grid {
+    grid-template-columns: 1fr 1fr;
+  }
   .quiz-cards {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -3068,6 +3129,13 @@ footer {
   }
   .quiz-copy h1 {
     font-size: 26px;
+  }
+  .archetype-grid {
+    grid-template-columns: 1fr;
+  }
+  .archetype-grid button {
+    min-height: 94px;
+    padding: 14px;
   }
   .quiz-cards {
     grid-template-columns: 1fr;
