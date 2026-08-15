@@ -45,16 +45,36 @@ import {
   getQuizQuestions,
   getWellnessArchetype,
   isWellnessArchetypeId,
+  QuizOption,
+  travelPeriodOptions,
   wellnessArchetypes,
 } from "@/lib/wellness-archetypes";
 
 type Answer = string | string[];
 const optionIcons = [Sparkles, Droplets, CircleGauge, Star, User, MapPin];
 const draftKey = "velari-journey-draft";
-const draftVersion = 2;
+const draftVersion = 4;
+const restrictionChips = [
+  { value: "no_hiking", label: "No hiking" },
+  { value: "no_water_activities", label: "No water activities" },
+  { value: "no_long_drives", label: "No long drives" },
+  { value: "no_high_impact", label: "No high-impact exercise" },
+];
 
-function tripLengthToDays(value: string) {
-  return ({ "1–3 days": 3, "4–7 days": 7, "1–2 weeks": 14, "2+ weeks": 21 } as Record<string, number>)[value] || 0;
+function optionValue(option: QuizOption) {
+  return typeof option === "string" ? option : option.value;
+}
+
+function optionLabel(option: QuizOption) {
+  return typeof option === "string" ? option : option.label;
+}
+
+function optionDescription(option: QuizOption) {
+  return typeof option === "string" ? undefined : option.description;
+}
+
+function answerLabel(question: { options?: QuizOption[] }, value: string) {
+  return optionLabel(question.options?.find((option) => optionValue(option) === value) || value);
 }
 
 function formatApiPrice(amount: number) {
@@ -157,7 +177,6 @@ export function JourneyQuiz() {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, Answer>>({});
   const [budget, setBudget] = useState(300);
-  const [birthdate, setBirthdate] = useState({ day: "", month: "", year: "" });
   const [validationError, setValidationError] = useState("");
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
@@ -165,7 +184,7 @@ export function JourneyQuiz() {
   const [intent, setIntent] = useState<PaymentIntentData | null>(null);
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const questions = useMemo(() => getQuizQuestions(answers.selected_archetype), [answers.selected_archetype]);
-  const totalQuestions = questions.length + (isWellnessArchetypeId(answers.selected_archetype) ? 0 : wellnessArchetypes[0].questions.length);
+  const totalQuestions = questions.length;
   const q = questions[step];
 
   useEffect(() => {
@@ -179,7 +198,6 @@ export function JourneyQuiz() {
       }
       if (draft.answers) setAnswers(draft.answers);
       if (draft.budget) setBudget(draft.budget);
-      if (draft.birthdate) setBirthdate(draft.birthdate);
       if (Number.isInteger(draft.step)) {
         setStep(Math.min(draft.step, getQuizQuestions(draft.answers.selected_archetype).length - 1));
       }
@@ -195,46 +213,54 @@ export function JourneyQuiz() {
   }, [router, status]);
 
   const saveDraft = useCallback(() => {
-    localStorage.setItem(draftKey, JSON.stringify({ version: draftVersion, answers, budget, birthdate, step }));
-  }, [answers, birthdate, budget, step]);
+    localStorage.setItem(draftKey, JSON.stringify({ version: draftVersion, answers, budget, step }));
+  }, [answers, budget, step]);
 
-  const selectAnswer = (value: string) => {
+  const selectAnswer = (value: string, answerKey = q.key, multiple = q.multiple, maxSelections = q.maxSelections) => {
     setValidationError("");
     setAnswers((current) => {
-      if (q.key === "selected_archetype") {
+      if (answerKey === "selected_archetype") {
         const withoutPreviousBranch = Object.fromEntries(
           Object.entries(current).filter(([key]) => !archetypeQuestionKeys.has(key)),
         );
         return { ...withoutPreviousBranch, selected_archetype: value };
       }
-      if (!q.multiple) return { ...current, [q.key]: value };
-      const selected = Array.isArray(current[q.key]) ? current[q.key] as string[] : [];
-      if (value === "No limitations") return { ...current, [q.key]: [value] };
-      const withoutNone = selected.filter((item) => item !== "No limitations");
+      if (!multiple) {
+        const nextAnswers = { ...current, [answerKey]: value };
+        if (answerKey === "travel_timing" && value === "flexible") delete nextAnswers.travel_months;
+        return nextAnswers;
+      }
+      const selected = Array.isArray(current[answerKey]) ? current[answerKey] as string[] : [];
+      const noPreference = answerKey === "preferred_setting" && value === "no_preference";
+      if (noPreference) return { ...current, [answerKey]: [] };
+      const withoutNone = selected.filter((item) => item !== "no_preference");
+      if (!withoutNone.includes(value) && maxSelections && withoutNone.length >= maxSelections) {
+        setValidationError(`You can select up to ${maxSelections} options.`);
+        return current;
+      }
       return {
         ...current,
-        [q.key]: withoutNone.includes(value)
+        [answerKey]: withoutNone.includes(value)
           ? withoutNone.filter((item) => item !== value)
           : [...withoutNone, value],
       };
     });
   };
 
-  const isSelected = (value: string) => {
-    const answer = answers[q.key];
+  const isSelected = (value: string, answerKey = q.key) => {
+    const answer = answers[answerKey];
     return Array.isArray(answer) ? answer.includes(value) : answer === value;
   };
 
   const validateStep = () => {
     if (q.kind === "range") return true;
-    if (q.kind === "date") {
-      const iso = `${birthdate.year}-${birthdate.month.padStart(2, "0")}-${birthdate.day.padStart(2, "0")}`;
-      const parsed = new Date(`${iso}T00:00:00Z`);
-      const valid = /^\d{4}-\d{2}-\d{2}$/.test(iso) && !Number.isNaN(parsed.getTime()) && parsed.toISOString().startsWith(iso) && parsed < new Date();
-      if (!valid) setValidationError("Enter a valid birthdate in the past.");
-      return valid;
+    if (q.kind === "timing" && answers.travel_timing === "specific" && (!Array.isArray(answers.travel_months) || !answers.travel_months.length)) {
+      setValidationError("Choose at least one month to continue.");
+      return false;
     }
+    if (q.key === "preferred_setting" && Array.isArray(answers.preferred_setting) && !answers.preferred_setting.length) return true;
     const value = answers[q.key];
+    if (q.kind === "text" && q.required === false) return true;
     const valid = Array.isArray(value) ? value.length > 0 : Boolean(value?.trim());
     if (!valid) setValidationError(q.kind === "text" ? "Tell us a little about what you need from this trip." : "Choose an option to continue.");
     return valid;
@@ -244,21 +270,33 @@ export function JourneyQuiz() {
     selected_archetype: isWellnessArchetypeId(answers.selected_archetype)
       ? answers.selected_archetype
       : "burned_out_achiever",
-    archetype_answers: Object.fromEntries(
-      (getWellnessArchetype(answers.selected_archetype)?.questions || []).map((question) => [
-        question.key,
-        String(answers[question.key] || ""),
-      ]),
-    ),
-    energy_level: String(answers.energy_level || ""),
-    travel_style: String(answers.travel_style || "").replace("|", " (") + (String(answers.travel_style || "").includes("|") ? ")" : ""),
-    trip_organization: String(answers.trip_organization || ""),
-    activity_restrictions: Array.isArray(answers.activity_restrictions) ? answers.activity_restrictions : [],
-    preferred_environments: Array.isArray(answers.preferred_environments) ? answers.preferred_environments : [],
-    birthdate: `${birthdate.year}-${birthdate.month.padStart(2, "0")}-${birthdate.day.padStart(2, "0")}`,
-    total_trip_budget: budget,
-    trip_length_days: tripLengthToDays(String(answers.trip_length_days || "")),
-  }), [answers, birthdate, budget]);
+    break_from: String(answers.break_from || ""),
+    arrival_priority: String(answers.arrival_priority || ""),
+    retreat_structure: String(answers.retreat_structure || ""),
+    reset_style: String(answers.reset_style || ""),
+    physical_intensity: String(answers.physical_intensity || ""),
+    travel_party: String(answers.travel_party || ""),
+    spirituality: String(answers.spirituality || ""),
+    travel_timing: String(answers.travel_timing || "") as "flexible" | "specific",
+    travel_months: answers.travel_timing === "specific" && Array.isArray(answers.travel_months)
+      ? answers.travel_months.map(Number).filter((month) => Number.isInteger(month) && month >= 1 && month <= 12)
+      : undefined,
+    party_details: answers.travel_party === "family"
+      ? { adults: Number(answers.family_adults || 1), children: Number(answers.family_children || 0) }
+      : answers.travel_party === "small_group"
+        ? { party_size: Number(answers.group_size || 2) }
+        : undefined,
+    planning_service: String(answers.planning_service || ""),
+    activity_restrictions: {
+      text: String(answers.activity_restrictions || ""),
+      codes: Array.isArray(answers.restriction_codes) ? answers.restriction_codes : [],
+    },
+    preferred_setting: Array.isArray(answers.preferred_setting) ? answers.preferred_setting : [],
+    budget_per_night: budget,
+    budget_open_ended: budget >= 7000,
+    trip_length: String(answers.trip_length || ""),
+    transform_focus: Array.isArray(answers.transform_focus) ? answers.transform_focus : [],
+  }), [answers, budget]);
 
   const initializePayment = useCallback(async () => {
     if (!token) {
@@ -275,7 +313,6 @@ export function JourneyQuiz() {
       if (!Number.isFinite(amount) || amount < 0.5) throw new Error("The journey price is currently unavailable.");
       const analysisPayload = {
         questions_answers: questionnaire,
-        hope_of_this_trip: String(answers.hope_of_this_trip || ""),
       };
       const data = await journeyApi<PaymentIntentData>("/payments", token, {
         method: "POST",
@@ -289,13 +326,17 @@ export function JourneyQuiz() {
             question: question.title.replaceAll("\n", " "),
             answer: question.key === "selected_archetype"
               ? getWellnessArchetype(answers.selected_archetype)?.name || ""
-              : question.key === "total_trip_budget"
-              ? String(budget)
-              : question.key === "birthdate"
-                ? questionnaire.birthdate
-                : Array.isArray(answers[question.key])
-                  ? (answers[question.key] as string[]).join(", ")
-                  : String(answers[question.key] || ""),
+              : question.key === "budget_per_night"
+                ? `${formatApiPrice(budget)}${budget >= 7000 ? "+" : ""}`
+                : question.key === "activity_restrictions"
+                  ? String(answers[question.key] || "No limitations provided")
+                  : question.key === "travel_timing" && answers.travel_timing === "specific"
+                    ? `Specific: ${(Array.isArray(answers.travel_months) ? answers.travel_months : []).map((month) => answerLabel({ options: travelPeriodOptions }, month)).join(", ")}`
+                    : Array.isArray(answers[question.key])
+                      ? (answers[question.key] as string[]).map((value) => answerLabel(question, value)).join(", ")
+                      : question.options
+                        ? answerLabel(question, String(answers[question.key] || ""))
+                        : String(answers[question.key] || ""),
           })),
           ...analysisPayload,
         }),
@@ -342,16 +383,22 @@ export function JourneyQuiz() {
         {q.prompt && <p>{q.prompt}</p>}
         {q.kind === "archetypes" && <div className="archetype-grid">{wellnessArchetypes.map((archetype, i) => { const Icon = optionIcons[i % optionIcons.length]; return <button type="button" key={archetype.id} className={isSelected(archetype.id) ? "selected" : ""} aria-pressed={isSelected(archetype.id)} onClick={() => selectAnswer(archetype.id)}><span className="archetype-icon"><Icon size={18} /></span><span><strong>{archetype.name}</strong><small>{archetype.description}</small></span></button>; })}</div>}
         {(!q.kind || q.kind === "options") && <div className={`quiz-options ${q.options!.length > 7 ? "wide" : ""}`}>
-          {q.options!.map((option, i) => { const Icon = optionIcons[i % optionIcons.length]; return <button type="button" key={option} className={isSelected(option) ? "selected" : ""} aria-pressed={isSelected(option)} onClick={() => selectAnswer(option)}><Icon size={14} />{option}</button>; })}
+          {q.options!.map((option, i) => { const Icon = optionIcons[i % optionIcons.length]; const value = optionValue(option); return <button type="button" key={value} className={isSelected(value) ? "selected" : ""} aria-pressed={isSelected(value)} onClick={() => selectAnswer(value)}><Icon size={14} />{optionLabel(option)}</button>; })}
         </div>}
-        {q.kind === "cards" && <div className="quiz-cards">{q.options!.map((raw, i) => { const [name, desc] = raw.split("|"); const Icon = [User, Users, Users, Home, Thermometer, Droplets][i % 6]; return <button type="button" key={raw} className={isSelected(raw) ? "selected" : ""} aria-pressed={isSelected(raw)} onClick={() => selectAnswer(raw)}><Icon size={18} /><span><strong>{name}</strong>{desc && <small>{desc}</small>}</span></button>; })}</div>}
-        {q.kind === "date" && <div className="date-fields">
-          <input aria-label="Day" inputMode="numeric" placeholder="DD" maxLength={2} value={birthdate.day} onChange={(event) => { setValidationError(""); setBirthdate({ ...birthdate, day: event.target.value.replace(/\D/g, "") }); }} />
-          <input aria-label="Month" inputMode="numeric" placeholder="MM" maxLength={2} value={birthdate.month} onChange={(event) => { setValidationError(""); setBirthdate({ ...birthdate, month: event.target.value.replace(/\D/g, "") }); }} />
-          <input aria-label="Year" inputMode="numeric" placeholder="YYYY" maxLength={4} value={birthdate.year} onChange={(event) => { setValidationError(""); setBirthdate({ ...birthdate, year: event.target.value.replace(/\D/g, "") }); }} />
-        </div>}
-        {q.kind === "range" && <div className="budget-field"><strong>{formatApiPrice(budget)}</strong><input aria-label="Total trip budget" type="range" min="100" max="7000" step="100" value={budget} onChange={(event) => setBudget(Number(event.target.value))} /><div><span>$100</span><span>$7,000</span></div></div>}
-        {q.kind === "text" && <textarea aria-label="Your hopes for this trip" placeholder="Type Here..." value={String(answers[q.key] || "")} onChange={(event) => { setValidationError(""); setAnswers({ ...answers, [q.key]: event.target.value }); }} />}
+        {q.kind === "cards" && <><div className="quiz-cards">{q.options!.map((option, i) => { const value = optionValue(option); const Icon = [User, Users, Users, Home, Thermometer, Droplets][i % 6]; return <button type="button" key={value} className={isSelected(value) ? "selected" : ""} aria-pressed={isSelected(value)} onClick={() => selectAnswer(value)}><Icon size={18} /><span><strong>{optionLabel(option)}</strong>{optionDescription(option) && <small>{optionDescription(option)}</small>}</span></button>; })}</div>
+          {answers.travel_party === "family" && <div className="quiz-options party-counts"><label>Adults<Input type="number" min="1" value={String(answers.family_adults || 1)} onChange={(event) => setAnswers((current) => ({ ...current, family_adults: event.target.value }))} /></label><label>Children<Input type="number" min="0" value={String(answers.family_children || 0)} onChange={(event) => setAnswers((current) => ({ ...current, family_children: event.target.value }))} /></label></div>}
+          {answers.travel_party === "small_group" && <div className="quiz-options party-counts"><label>Party size<Input type="number" min="2" value={String(answers.group_size || 2)} onChange={(event) => setAnswers((current) => ({ ...current, group_size: event.target.value }))} /></label></div>}</>}
+        {q.kind === "timing" && <>
+          <div className="quiz-options">
+            {q.options!.map((option, i) => { const Icon = optionIcons[i % optionIcons.length]; const value = optionValue(option); return <button type="button" key={value} className={isSelected(value) ? "selected" : ""} aria-pressed={isSelected(value)} onClick={() => selectAnswer(value)}><Icon size={14} />{optionLabel(option)}</button>; })}
+          </div>
+          {answers.travel_timing === "specific" && <div className="quiz-options wide timing-periods">
+            <small className="quiz-section-label">Choose one or more months</small>
+            {travelPeriodOptions.map((option, i) => { const Icon = optionIcons[i % optionIcons.length]; const value = optionValue(option); return <button type="button" key={value} className={isSelected(value, "travel_months") ? "selected" : ""} aria-pressed={isSelected(value, "travel_months")} onClick={() => selectAnswer(value, "travel_months", true)}><Icon size={14} />{optionLabel(option)}</button>; })}
+          </div>}
+        </>}
+        {q.kind === "range" && <div className="budget-field"><strong>{formatApiPrice(budget)}{budget >= 7000 ? "+" : ""}</strong><input aria-label="Budget per night" type="range" min="100" max="7000" step="100" value={budget} onChange={(event) => setBudget(Number(event.target.value))} /><div><span>$100</span><span>$7,000+</span></div><small>Maximum nightly budget in USD</small></div>}
+        {q.kind === "text" && <><textarea aria-label="Activity limitations" placeholder="For example: no hiking, water activities, long drives, extreme heat, or high-impact exercise." value={String(answers[q.key] || "")} onChange={(event) => { setValidationError(""); setAnswers({ ...answers, [q.key]: event.target.value }); }} /><small className="quiz-section-label">Optional restriction tags</small><div className="quiz-options wide">{restrictionChips.map((chip) => <button type="button" key={chip.value} className={isSelected(chip.value, "restriction_codes") ? "selected" : ""} onClick={() => selectAnswer(chip.value, "restriction_codes", true)}>{chip.label}</button>)}</div><p className="quiz-help">We’ll check restrictions where property data allows; unverified restrictions may be shown as warnings.</p></>}
         {validationError && <p className="quiz-error" role="alert"><AlertCircle size={14} />{validationError}</p>}
       </div>
       <button className="quiz-continue" onClick={continueJourney}>{step === questions.length - 1 ? "Continue to payment" : "Continue"} <ArrowRight size={15} /></button>

@@ -12,18 +12,27 @@ type ApiEnvelope<T> = {
 
 export type QuestionnaireAnswers = {
   selected_archetype: import("@/lib/wellness-archetypes").WellnessArchetypeId;
-  archetype_answers: Record<string, string>;
-  energy_level: string;
-  travel_style: string;
-  trip_organization: string;
-  activity_restrictions: string[];
-  preferred_environments: string[];
-  birthdate: string;
-  total_trip_budget: number;
-  trip_length_days: number;
+  break_from: string;
+  arrival_priority: string;
+  retreat_structure: string;
+  reset_style: string;
+  physical_intensity: string;
+  travel_party: string;
+  party_details?: { adults?: number; children?: number; party_size?: number };
+  spirituality: string;
+  travel_timing: "flexible" | "specific";
+  travel_months?: number[];
+  planning_service: string;
+  activity_restrictions: { text: string; codes: string[] };
+  preferred_setting: string[];
+  budget_per_night: number;
+  budget_open_ended: boolean;
+  trip_length: string;
+  transform_focus: string[];
 };
 
 export type SuggestedCity = {
+  propertyId?: string;
   cityName: string;
   countryName: string;
   cityImage: string[];
@@ -31,6 +40,16 @@ export type SuggestedCity = {
   longitude: number;
   numberOfDays: number;
   description: string;
+  matchScore?: number;
+  matchReasons?: string[];
+  warnings?: string[];
+  restrictionVerification?: string;
+  nightlyPrice?: string;
+  nightlyPriceIsLowerBound?: boolean;
+  budgetTier?: string;
+  packageType?: string;
+  bestSeason?: string;
+  settings?: string[];
 };
 
 export type TourActivity = {
@@ -47,9 +66,11 @@ export type TourActivity = {
 export type JourneyHistory = {
   _id: string;
   aiSessionId?: string;
+  activitySessionId?: string;
   aiAnalysisStatus: "pending" | "suggested_cities_ready" | "completed" | "failed";
   suggestedCities: SuggestedCity[];
   selectedCity?: string;
+  selectedPropertyId?: string;
   travelThemes?: string[];
   astroInsight?: string;
   userProfile?: {
