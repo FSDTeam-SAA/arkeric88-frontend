@@ -9,7 +9,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { FooterSection } from "@/components/landing/sections/FooterSection";
 import { NavbarSection } from "@/components/landing/sections/NavbarSection";
-import { ApiError, journeyApi, JourneyHistory } from "@/lib/journey-api";
+import { ApiError, journeyApi, JourneyHistory, SuggestedCity } from "@/lib/journey-api";
 
 type PaymentHistory = {
   payment: {
@@ -88,7 +88,8 @@ export function ResultsPage() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("Reading your emotional travel profile…");
   const [error, setError] = useState<{ message: string; notFound?: boolean; analysisFailed?: boolean } | null>(null);
-  const [selectedCity, setSelectedCity] = useState("");
+  const [selectedPropertyId, setSelectedPropertyId] = useState("");
+  const [regenerating, setRegenerating] = useState(false);
   const pollCount = useRef(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -181,11 +182,15 @@ export function ResultsPage() {
     void load();
   };
 
-  const createItinerary = async (cityName: string) => {
+  const createItinerary = async (city: SuggestedCity) => {
     if (!history) return;
-    const normalizeCity = (value?: string) => value?.trim().toLocaleLowerCase();
+    if (!city.propertyId) {
+      toast.error("This recommendation is missing its property ID. Please refresh your matches or start a new journey.");
+      return;
+    }
+    const cityName = city.cityName;
     const hasSavedItinerary = Boolean(
-      history.tourPlan?.length && normalizeCity(history.selectedCity) === normalizeCity(cityName),
+      history.tourPlan?.length && history.selectedPropertyId === city.propertyId,
     );
 
     if (hasSavedItinerary) {
@@ -197,18 +202,18 @@ export function ResultsPage() {
       toast.error("This journey is missing its AI session, so a new itinerary can't be generated.");
       return;
     }
-    setSelectedCity(cityName);
+    setSelectedPropertyId(city.propertyId);
     try {
       const data = await journeyApi<{ history: JourneyHistory }>("/history/tour-plan", token, {
         method: "POST",
-        body: JSON.stringify({ session_id: history.aiSessionId, selected_city: cityName }),
+        body: JSON.stringify({ session_id: history.aiSessionId, selected_city: cityName, property_id: city.propertyId }),
       });
       router.push(`/itinerary/${data.history._id}`);
     } catch (caught) {
       try {
         const latest = await journeyApi<JourneyHistory>(`/history/my/${encodeURIComponent(history._id)}`, token);
         const savedPlanAvailable = Boolean(
-          latest.tourPlan?.length && normalizeCity(latest.selectedCity) === normalizeCity(cityName),
+          latest.tourPlan?.length && latest.selectedPropertyId === city.propertyId,
         );
         if (savedPlanAvailable) {
           setHistory(latest);
@@ -218,8 +223,25 @@ export function ResultsPage() {
       } catch {
         // Preserve the original AI error when the database fallback is unavailable.
       }
-      setSelectedCity("");
+      setSelectedPropertyId("");
       toast.error(caught instanceof Error ? caught.message : "Unable to create the itinerary.");
+    }
+  };
+
+  const regenerateSuggestions = async () => {
+    if (!token || !history?.aiSessionId || regenerating) return;
+    setRegenerating(true);
+    try {
+      const data = await journeyApi<{ history: JourneyHistory }>("/history/regenerate-suggested-cities", token, {
+        method: "POST",
+        body: JSON.stringify({ session_id: history.aiSessionId }),
+      });
+      setHistory(data.history);
+      setSelectedPropertyId("");
+    } catch (caught) {
+      toast.error(caught instanceof Error ? caught.message : "Unable to find more destinations.");
+    } finally {
+      setRegenerating(false);
     }
   };
 
@@ -234,11 +256,11 @@ export function ResultsPage() {
 
   return <main className="results-page"><NavbarSection activePage="none" />
     <section className="results-hero"><div className="results-shade" /><div><small>YOUR EMOTIONAL TRAVEL PROFILE</small><h1>{archetype}</h1><p>{heroDescription}</p><div className="result-tags">{(tags.length ? tags : [profile?.zodiacSign, profile?.currentEnergy, profile?.travelStyle]).filter(Boolean).map((tag) => <span key={tag}>{tag}</span>)}</div></div></section>
-    <section className="matched"><h2>Your Matched Destinations</h2><p>Selected for your unique emotional, astrological, and travel profile.<br />Choose a destination to create the full day-by-day itinerary.</p><div className="match-grid">{history.suggestedCities.map((city, index) => {
+    <section className="matched"><h2>Your Matched Destinations</h2><p>Selected for your unique emotional, astrological, and travel profile.<br />Choose a destination to create the full day-by-day itinerary.</p><button type="button" className="match-link" onClick={() => void regenerateSuggestions()} disabled={regenerating || Boolean(selectedPropertyId)}>{regenerating ? <><Loader2 className="spin" size={13} /> Finding more options…</> : <><RefreshCw size={13} /> Show other options</>}</button><div className="match-grid">{history.suggestedCities.map((city, index) => {
       const image = city.cityImage?.find(Boolean) || fallbackImages[index % fallbackImages.length];
-      const isCreating = selectedCity === city.cityName;
-      const hasSavedItinerary = Boolean(history.tourPlan?.length && history.selectedCity?.trim().toLocaleLowerCase() === city.cityName.trim().toLocaleLowerCase());
-      return <button className="match-card" type="button" key={`${city.cityName}-${index}`} onClick={() => void createItinerary(city.cityName)} disabled={Boolean(selectedCity)} aria-label={`${hasSavedItinerary ? "View saved" : "Create"} ${city.cityName} itinerary`}><article><div className="match-image"><Image src={image} alt={city.cityName} fill unoptimized sizes="(max-width:700px) 90vw, 30vw" onError={(event) => { event.currentTarget.src = fallbackImages[index % fallbackImages.length]; }} /><span>#{index + 1} match</span>{isCreating && <div className="match-loading"><div className="match-loader-mark"><span /><Sparkles size={23} /></div><strong>Designing your {city.cityName} journey</strong><small>Organizing your days, stay and experiences…</small><div className="match-loader-track"><i /></div></div>}</div><div className="match-copy"><h3>{city.cityName}</h3><div className="match-meta"><span><MapPin size={12} />{city.countryName}</span><span><CalendarDays size={12} />{city.numberOfDays || profile?.tripLengthDays || "—"} days</span></div><p>{city.description || "Personalized for your emotional and travel profile."}</p><span className="match-link">{hasSavedItinerary ? "View Saved Itinerary" : "Create Full Itinerary"} <ArrowRight size={13} /></span></div></article></button>;
+      const isCreating = selectedPropertyId === city.propertyId;
+      const hasSavedItinerary = Boolean(history.tourPlan?.length && history.selectedPropertyId === city.propertyId);
+      return <button className="match-card" type="button" key={city.propertyId || `${city.cityName}-${index}`} onClick={() => void createItinerary(city)} disabled={Boolean(selectedPropertyId) || regenerating} aria-label={`${hasSavedItinerary ? "View saved" : "Create"} ${city.cityName} itinerary`}><article><div className="match-image"><Image src={image} alt={city.cityName} fill unoptimized sizes="(max-width:700px) 90vw, 30vw" onError={(event) => { event.currentTarget.src = fallbackImages[index % fallbackImages.length]; }} /><span>{city.matchScore != null ? `Match score: ${city.matchScore}` : `#${index + 1} match`}</span>{isCreating && <div className="match-loading"><div className="match-loader-mark"><span /><Sparkles size={23} /></div><strong>Designing your {city.cityName} journey</strong><small>Organizing your days, stay and experiences…</small><div className="match-loader-track"><i /></div></div>}</div><div className="match-copy"><h3>{city.cityName}</h3><div className="match-meta"><span><MapPin size={12} />{city.countryName}</span><span><CalendarDays size={12} />{city.numberOfDays || profile?.tripLengthDays || "—"} days</span></div><p>{city.description || "Personalized for your emotional and travel profile."}</p>{city.matchReasons?.length ? <p><strong>Why it fits:</strong> {city.matchReasons.slice(0, 3).join(" · ")}</p> : null}{city.nightlyPrice && <p><strong>Nightly price:</strong> {city.nightlyPrice}{city.nightlyPriceIsLowerBound ? " (from)" : ""}{city.budgetTier ? ` · ${city.budgetTier}` : ""}</p>}{city.packageType || city.bestSeason || city.settings?.length ? <p>{[city.packageType, city.bestSeason, city.settings?.join(", ")].filter(Boolean).join(" · ")}</p> : null}{city.restrictionVerification && <p><strong>Restrictions:</strong> {city.restrictionVerification}</p>}{city.warnings?.map((warning) => <p key={warning} role="note"><AlertCircle size={13} /> {warning}</p>)}<span className="match-link">{hasSavedItinerary ? "View Saved Itinerary" : "Create Full Itinerary"} <ArrowRight size={13} /></span></div></article></button>;
     })}</div></section><FooterSection />
   </main>;
 }

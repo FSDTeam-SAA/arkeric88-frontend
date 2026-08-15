@@ -1377,6 +1377,41 @@ footer {
 .quiz-options.wide {
   max-width: 680px;
 }
+.quiz-section-label {
+  display: block;
+  flex: 0 0 100%;
+  margin: 14px auto 8px;
+  color: #8f8c83;
+  font-size: 11px;
+}
+.party-counts {
+  margin-top: 18px;
+}
+.party-counts label {
+  display: grid;
+  gap: 6px;
+  color: #696661;
+  font-size: 12px;
+  text-align: left;
+}
+.party-counts input {
+  width: 112px;
+}
+.quiz-help {
+  max-width: 570px;
+  margin: 12px auto 0;
+  color: #696661;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.quiz-copy > p.quiz-help {
+  margin: 12px auto 0;
+  font-size: 12px;
+  font-weight: 400;
+}
+.timing-periods {
+  margin-top: 22px;
+}
 .archetype-grid {
   width: min(860px, 100%);
   margin: 0 auto;
@@ -1513,6 +1548,12 @@ footer {
   color: #aaa69e;
   font-size: 11px;
 }
+.budget-field > small {
+  display: block;
+  margin-top: 5px;
+  color: #aaa69e;
+  font-size: 11px;
+}
 .quiz-copy textarea {
   width: min(560px, 90%);
   height: 170px;
@@ -1522,6 +1563,8 @@ footer {
   border-radius: 5px;
   background: transparent;
   outline-color: var(--olive);
+  display: block;
+  margin: 0 auto;
 }
 .quiz-error {
   width: max-content;
@@ -1881,6 +1924,24 @@ footer {
   outline-offset: 4px;
 }
 .match-card:disabled { cursor: wait; }
+.matched > .match-link,
+.day-plan > .match-link {
+  margin: 12px auto 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #7c8672;
+  border-radius: 999px;
+  padding: 8px 13px;
+  color: #4e5947;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.day-plan > .match-link { margin: 12px 0 0; }
+.matched > .match-link:disabled,
+.day-plan > .match-link:disabled { cursor: wait; opacity: 0.65; }
 .match-card article {
   height: 100%;
   overflow: hidden;
@@ -2005,6 +2066,12 @@ footer {
   color: #76736e;
   font-size: 11px;
   line-height: 1.35;
+}
+.match-copy p[role="note"] {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  color: #844b42;
 }
 .match-copy .match-link {
   margin-top: auto;
