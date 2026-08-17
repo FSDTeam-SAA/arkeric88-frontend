@@ -258,6 +258,15 @@ export function JourneyQuiz() {
       setValidationError("Choose at least one month to continue.");
       return false;
     }
+    if (q.key === "retreat_structure") {
+      const hasStructure = Boolean(String(answers.retreat_structure || "").trim());
+      const hasPlanning = Boolean(String(answers.planning_service || "").trim());
+      if (!hasStructure || !hasPlanning) {
+        setValidationError("Choose both a retreat structure and a planning preference to continue.");
+        return false;
+      }
+      return true;
+    }
     if (q.key === "preferred_setting" && Array.isArray(answers.preferred_setting) && !answers.preferred_setting.length) return true;
     const value = answers[q.key];
     if (q.kind === "text" && q.required === false) return true;
@@ -355,7 +364,15 @@ export function JourneyQuiz() {
     setValidationError("");
     if (!validateStep()) return;
     if (step < questions.length - 1) {
-      setStep((current) => current + 1);
+      // Advance one step; if the next step is the standalone planning_service
+      // but we've already collected planning_service on the combined screen,
+      // skip it so users don't see the same question twice.
+      setStep((current) => {
+        const next = current + 1;
+        const nextQ = questions[next];
+        if (nextQ?.key === "planning_service" && answers.planning_service) return next + 1;
+        return next;
+      });
       return;
     }
     saveDraft();
@@ -385,6 +402,21 @@ export function JourneyQuiz() {
         {(!q.kind || q.kind === "options") && <div className={`quiz-options ${q.options!.length > 7 ? "wide" : ""}`}>
           {q.options!.map((option, i) => { const Icon = optionIcons[i % optionIcons.length]; const value = optionValue(option); return <button type="button" key={value} className={isSelected(value) ? "selected" : ""} aria-pressed={isSelected(value)} onClick={() => selectAnswer(value)}><Icon size={14} />{optionLabel(option)}</button>; })}
         </div>}
+        {q.key === "retreat_structure" && (() => {
+          const planningQ = questions.find((qq) => qq.key === "planning_service");
+          if (!planningQ) return null;
+          return <div className="quiz-section">
+            <small className="quiz-section-label">{planningQ.title}</small>
+            <div className={`quiz-options ${planningQ.options!.length > 7 ? "wide" : ""}`}>
+              {planningQ.options!.map((option, i) => {
+                const value = optionValue(option);
+                const Icon = optionIcons[i % optionIcons.length];
+                return <button type="button" key={value} className={isSelected(value, "planning_service") ? "selected" : ""} aria-pressed={isSelected(value, "planning_service")} onClick={() => selectAnswer(value, "planning_service")}>{Icon && <Icon size={14} />}{optionLabel(option)}</button>;
+              })}
+            </div>
+            <p className="quiz-help">This affects planning support, not which retreat matches you.</p>
+          </div>;
+        })()}
         {q.kind === "cards" && <><div className="quiz-cards">{q.options!.map((option, i) => { const value = optionValue(option); const Icon = [User, Users, Users, Home, Thermometer, Droplets][i % 6]; return <button type="button" key={value} className={isSelected(value) ? "selected" : ""} aria-pressed={isSelected(value)} onClick={() => selectAnswer(value)}><Icon size={18} /><span><strong>{optionLabel(option)}</strong>{optionDescription(option) && <small>{optionDescription(option)}</small>}</span></button>; })}</div>
           {answers.travel_party === "family" && <div className="quiz-options party-counts"><label>Adults<Input type="number" min="1" value={String(answers.family_adults || 1)} onChange={(event) => setAnswers((current) => ({ ...current, family_adults: event.target.value }))} /></label><label>Children<Input type="number" min="0" value={String(answers.family_children || 0)} onChange={(event) => setAnswers((current) => ({ ...current, family_children: event.target.value }))} /></label></div>}
           {answers.travel_party === "small_group" && <div className="quiz-options party-counts"><label>Party size<Input type="number" min="2" value={String(answers.group_size || 2)} onChange={(event) => setAnswers((current) => ({ ...current, group_size: event.target.value }))} /></label></div>}</>}
