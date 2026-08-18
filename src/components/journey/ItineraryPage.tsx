@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { AlertCircle, Compass, Download, Loader2, MapPin, RefreshCw, Star } from "lucide-react";
+import { AlertCircle, ArrowLeft, Compass, Download, Loader2, MapPin, RefreshCw, Star } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { FooterSection } from "@/components/landing/sections/FooterSection";
@@ -83,6 +83,14 @@ export function ItineraryPage({ historyId }: { historyId?: string }) {
     }
   };
 
+  const goBack = () => {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/account/search-history");
+    }
+  };
+
   const regenerateDay = async () => {
     if (!token || !history.activitySessionId || regenerating) {
       toast.error("This itinerary can’t be regenerated because its activity session is unavailable.");
@@ -104,7 +112,7 @@ export function ItineraryPage({ historyId }: { historyId?: string }) {
   };
 
   return <main className="itinerary-page"><NavbarSection activePage="none" />
-    <section className="itinerary-hero" style={{ backgroundImage: `url(${JSON.stringify(heroImage)})` }}><div className="itinerary-shade" /><div className="itinerary-title"><h1>Your Journey to {city}</h1><p>Curated around your emotional and travel profile</p></div><span>{city}{cityMatch?.countryName ? `, ${cityMatch.countryName}` : ""} · {plans.length} Days</span><button type="button" onClick={() => void downloadPdf()} disabled={downloadingPdf}>{downloadingPdf ? <><Loader2 className="spin" size={15} /> Creating PDF…</> : <><Download size={15} /> Download PDF</>}</button></section>
+    <section className="itinerary-hero" style={{ backgroundImage: `url(${JSON.stringify(heroImage)})` }}><div className="itinerary-shade" /><button type="button" className="itinerary-back" onClick={goBack} aria-label="Go back"><ArrowLeft size={15} /> Back</button><div className="itinerary-title"><h1>Your Journey to {city}</h1><p>Curated around your emotional and travel profile</p></div><span>{city}{cityMatch?.countryName ? `, ${cityMatch.countryName}` : ""} · {plans.length} Days</span><button type="button" onClick={() => void downloadPdf()} disabled={downloadingPdf}>{downloadingPdf ? <><Loader2 className="spin" size={15} /> Creating PDF…</> : <><Download size={15} /> Download PDF</>}</button></section>
     <section className="itinerary-layout"><aside><h3>Your Trip at a Glance</h3><small>Duration</small><strong>{plans.length} Days</strong><small>Zodiac sign</small><strong>{history.userProfile?.zodiacSign || "—"}</strong><small>Travel style</small><strong>{history.userProfile?.travelStyle || "—"}</strong><small>Destination</small><strong>{city}{cityMatch?.countryName ? `, ${cityMatch.countryName}` : ""}</strong>{history.stay?.name && <><small>Recommended stay</small><strong>{history.stay.name}</strong>{history.stay.rating && <span className="stay-rating"><Star size={12} fill="currentColor" />{history.stay.rating}</span>}</>}</aside>
       <div className="day-plan"><div className="day-tabs">{plans.map((plan, index) => <button type="button" key={`${plan.day}-${index}`} onClick={() => setDayIndex(index)} className={dayIndex === index ? "active" : ""}>Day {plan.day || index + 1}</button>)}</div><h2>Day {activeDay.day || dayIndex + 1}</h2><button type="button" className="match-link" onClick={() => void regenerateDay()} disabled={regenerating}>{regenerating ? <><Loader2 className="spin" size={13} /> Refreshing day…</> : <><RefreshCw size={13} /> Change this day</>}</button><p>{activeDay.activities?.length ? "A thoughtfully paced experience, personalized for you." : "No activities were returned for this day."}</p><div className="timeline">{activeDay.activities?.map((activity, index) => {
         const activityImage = activity.activityImage?.find(Boolean);
