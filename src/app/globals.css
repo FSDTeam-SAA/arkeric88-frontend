@@ -2840,6 +2840,20 @@ footer {
   background: var(--cream);
   color: var(--ink);
 }
+.legal-page--sticky-hero {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.legal-page--sticky-hero .legal-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+}
 .legal-hero {
   min-height: 380px;
   position: relative;
@@ -2851,6 +2865,24 @@ footer {
   background:
     radial-gradient(120% 90% at 50% 0%, rgba(198, 178, 133, 0.2), transparent 60%),
     url('/images/how-it-works-hero.jpg') center 48% / cover;
+}
+.legal-page--sticky-hero .legal-hero {
+  flex: 0 0 auto;
+  min-height: 0;
+  height: clamp(230px, 29vh, 270px);
+  padding: 26px 24px 22px;
+}
+.legal-page--sticky-hero .legal-hero h1 {
+  font-size: clamp(44px, 5vw, 58px);
+}
+.legal-page--sticky-hero .legal-hero-desc {
+  margin-top: 8px;
+}
+.legal-page--sticky-hero .legal-updated {
+  margin-top: 10px;
+}
+.legal-page--sticky-hero .legal-back {
+  top: 16px;
 }
 .legal-hero-shade {
   position: absolute;
@@ -2916,20 +2948,27 @@ footer {
   font-size: 12px;
 }
 .legal-layout {
-  max-width: 1200px;
+  max-width: 1240px;
   margin: 0 auto;
-  padding: 72px 24px 90px;
+  padding: 72px 0px 90px;
   display: grid;
   grid-template-columns: 250px minmax(0, 1fr);
-  gap: 60px;
+  gap: 20px;
   align-items: start;
 }
 .legal-toc {
   position: sticky;
   top: 96px;
 }
+.legal-page--sticky-hero .legal-toc {
+  top: 24px;
+}
+.legal-page--sticky-hero .legal-toc-inner {
+  max-height: calc(100dvh - 330px);
+  overflow-y: auto;
+}
 .legal-toc-inner {
-  padding: 24px 22px;
+  padding: 20px;
   border: 1px solid rgba(94, 103, 85, 0.16);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.5);
@@ -2999,10 +3038,19 @@ footer {
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.6);
 }
+.legal-page--sticky-hero .legal-section {
+  scroll-margin-top: 24px;
+}
 .legal-section h2 {
   margin: 0 0 4px;
   font-size: clamp(24px, 2.4vw, 30px);
   line-height: 1.2;
+}
+.legal-section h3 {
+  margin: 22px 0 4px;
+  color: #4c4a45;
+  font-size: 17px;
+  font-weight: 600;
 }
 .legal-section-body {
   color: #66635f;
@@ -3020,12 +3068,18 @@ footer {
   margin: 12px 0 0;
   padding-left: 22px;
 }
+.legal-section-body ul {
+  list-style: disc outside;
+}
+.legal-section-body ol {
+  list-style: decimal outside;
+}
 .legal-section-body li {
   margin: 7px 0;
   padding-left: 4px;
 }
 .legal-section-body li::marker {
-  color: #b7a282;
+  color: var(--olive);
 }
 .legal-section-body strong {
   color: #4c4a45;
@@ -3047,17 +3101,41 @@ footer {
   line-height: 1.6;
 }
 .legal-foot {
-  padding: 0 24px 70px;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-top: 1px solid rgba(94, 103, 85, 0.12);
+  background: #e9e2d9;
   text-align: center;
-  color: #98917f;
-  font-size: 13px;
+  color: #66635f;
+  font-size: 15px;
+}
+.legal-foot p {
+  margin: 0;
+  line-height: 1.5;
 }
 .legal-foot a {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 8px;
+  max-width: 100%;
+  padding: 10px 16px;
+  border: 1px solid rgba(94, 103, 85, 0.2);
+  border-radius: 999px;
   color: var(--olive);
+  font-size: 14px;
   font-weight: 600;
+  overflow-wrap: anywhere;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.legal-foot a:hover,
+.legal-foot a:focus-visible {
+  border-color: var(--olive);
+  background: rgba(94, 103, 85, 0.08);
 }
 
 @media (max-width: 900px) {
@@ -3068,6 +3146,12 @@ footer {
   }
   .legal-toc {
     position: static;
+  }
+  .legal-page--sticky-hero .legal-toc {
+    position: static;
+  }
+  .legal-page--sticky-hero .legal-toc-inner {
+    max-height: 190px;
   }
   .legal-toc ol {
     display: flex;
@@ -3087,6 +3171,26 @@ footer {
   .legal-hero {
     min-height: 360px;
     padding: 34px 18px 46px;
+  }
+  .legal-page--sticky-hero .legal-hero {
+    height: 235px;
+    min-height: 0;
+    padding: 42px 18px 12px;
+  }
+  .legal-page--sticky-hero .legal-hero h1 {
+    font-size: clamp(36px, 9vw, 50px);
+  }
+  .legal-page--sticky-hero .legal-hero-desc {
+    margin-top: 8px;
+    font-size: 13px;
+  }
+  .legal-page--sticky-hero .legal-updated {
+    margin-top: 10px;
+  }
+  .legal-page--sticky-hero .legal-back {
+    top: 12px;
+    left: 18px;
+    padding: 5px 12px;
   }
   .legal-back {
     margin-bottom: 20px;
