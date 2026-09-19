@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { FormEvent, useCallback, useEffect, useState } from 'react'
 import {
   Check,
@@ -440,7 +441,7 @@ function PersonalInformation() {
       <div className="profile-photo">
         <div className="profile-photo-avatar">
           {displayPhoto ? (
-            <img src={displayPhoto} alt="Profile" />
+            <Image src={displayPhoto} alt="Profile" width={92} height={92} unoptimized />
           ) : (
             <UserRound size={30} />
           )}
