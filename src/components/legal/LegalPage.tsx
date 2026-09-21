@@ -27,7 +27,7 @@ export function LegalPage({
   updated,
   sections,
   introduction,
-  contactEmail = "help@velari.com",
+  contactEmail = "hello@velaritravel.com",
   contactLabel = "this policy",
   dateLabel = "Last updated",
   stickyHero = false,
