@@ -6,18 +6,18 @@ const sections: LegalSection[] = [
     title: "1. Eligibility",
     body: (
       <>
-        <p>You must be at least 18 years old to create a Velari account or use Velari&#39;s personalized services.</p>
-        <p>By using Velari, you represent that you have the legal capacity to enter into these Terms.</p>
+        <p>You must be at least 18 years old to create a Velari™ account or use Velari™&#39;s personalized services.</p>
+        <p>By using Velari™, you represent that you have the legal capacity to enter into these Terms.</p>
       </>
     ),
   },
   {
     id: "what-velari-provides",
-    title: "2. What Velari Provides",
+    title: "2. What Velari™ Provides",
     body: (
       <>
-        <p>Velari is a travel discovery and personalization platform designed to help users identify destinations, accommodations, experiences, and itinerary ideas based on their individual travel preferences and Emotional Travel™ profile.</p>
-        <p>Velari&#39;s services may include:</p>
+        <p>Velari™ is a travel discovery and personalization platform designed to help users identify destinations, accommodations, experiences, and itinerary ideas based on their individual travel preferences and Emotional Travel™ profile.</p>
+        <p>Velari™&#39;s services may include:</p>
         <ul>
           <li>The Emotional Travel™ Assessment</li>
           <li>Emotional Travel™ profiles</li>
@@ -52,7 +52,7 @@ const sections: LegalSection[] = [
           <li>Therapy</li>
           <li>Medical or psychological advice</li>
         </ul>
-        <p>Velari does not diagnose or treat medical or mental health conditions.</p>
+        <p>Velari™ does not diagnose or treat medical or mental health conditions.</p>
         <p>If you have concerns about your physical or mental health, you should consult an appropriate licensed professional.</p>
       </>
     ),
@@ -62,9 +62,9 @@ const sections: LegalSection[] = [
     title: "4. Artificial Intelligence",
     body: (
       <>
-        <p>Velari uses artificial intelligence and automated technologies to help analyze preferences and generate personalized travel recommendations.</p>
+        <p>Velari™ uses artificial intelligence and automated technologies to help analyze preferences and generate personalized travel recommendations.</p>
         <p>AI-generated information may occasionally be incomplete, inaccurate, outdated, or unsuitable for a particular traveler.</p>
-        <p>Velari does not guarantee that:</p>
+        <p>Velari™ does not guarantee that:</p>
         <ul>
           <li>A destination will produce a particular emotional outcome</li>
           <li>A recommended experience will be appropriate for every traveler</li>
@@ -82,9 +82,9 @@ const sections: LegalSection[] = [
     title: "5. Emotional Outcomes",
     body: (
       <>
-        <p>Velari designs recommendations around what users say they hope to experience or gain from travel.</p>
+        <p>Velari™ designs recommendations around what users say they hope to experience or gain from travel.</p>
         <p>Travel experiences are subjective.</p>
-        <p>Velari does not guarantee that any destination, accommodation, experience, or itinerary will cause a particular emotional, psychological, wellness, or personal outcome.</p>
+        <p>Velari™ does not guarantee that any destination, accommodation, experience, or itinerary will cause a particular emotional, psychological, wellness, or personal outcome.</p>
         <p>Terms such as &quot;restoration,&quot; &quot;clarity,&quot; &quot;connection,&quot; &quot;discovery,&quot; &quot;adventure,&quot; or similar concepts describe travel goals and preferences, not guaranteed outcomes.</p>
       </>
     ),
@@ -94,10 +94,10 @@ const sections: LegalSection[] = [
     title: "6. Optional Astrology Features",
     body: (
       <>
-        <p>Velari may provide optional astrology-based personalization features.</p>
+        <p>Velari™ may provide optional astrology-based personalization features.</p>
         <p>Participation is voluntary.</p>
         <p>Astrology information is provided for personalization, entertainment, and travel-inspiration purposes. It should not be interpreted as scientific, medical, psychological, financial, legal, or professional advice.</p>
-        <p>Users are not required to provide astrology or birth information in order to use Velari&#39;s core Emotional Travel™ services.</p>
+        <p>Users are not required to provide astrology or birth information in order to use Velari™&#39;s core Emotional Travel™ services.</p>
       </>
     ),
   },
@@ -106,7 +106,7 @@ const sections: LegalSection[] = [
     title: "7. Travel Recommendations",
     body: (
       <>
-        <p>Velari&#39;s recommendations are intended to assist with travel discovery and planning.</p>
+        <p>Velari™&#39;s recommendations are intended to assist with travel discovery and planning.</p>
         <p>Recommendations may be based on:</p>
         <ul>
           <li>Information you provide</li>
@@ -144,8 +144,8 @@ const sections: LegalSection[] = [
     title: "8. Travel Booking",
     body: (
       <>
-        <p>Unless expressly stated otherwise within the Velari platform, Velari currently provides travel discovery, planning, and recommendation services and does not directly operate airlines, hotels, resorts, tour companies, transportation companies, restaurants, or experience providers.</p>
-        <p>Velari may provide links or connections to third-party companies through which travel services can be purchased.</p>
+        <p>Unless expressly stated otherwise within the Velari™ platform, Velari™ currently provides travel discovery, planning, and recommendation services and does not directly operate airlines, hotels, resorts, tour companies, transportation companies, restaurants, or experience providers.</p>
+        <p>Velari™ may provide links or connections to third-party companies through which travel services can be purchased.</p>
         <p>If you make a reservation or purchase through a third party, your transaction is between you and that provider.</p>
         <p>The third party&#39;s:</p>
         <ul>
@@ -158,8 +158,8 @@ const sections: LegalSection[] = [
           <li>Service obligations</li>
         </ul>
         <p>will apply to that transaction.</p>
-        <p>Velari is not responsible for the acts, omissions, cancellations, service failures, or policies of independent third-party travel providers.</p>
-        <p>If Velari introduces direct booking or payment services in the future, the applicable terms will be clearly disclosed before a user completes a transaction.</p>
+        <p>Velari™ is not responsible for the acts, omissions, cancellations, service failures, or policies of independent third-party travel providers.</p>
+        <p>If Velari™ introduces direct booking or payment services in the future, the applicable terms will be clearly disclosed before a user completes a transaction.</p>
       </>
     ),
   },
@@ -169,9 +169,9 @@ const sections: LegalSection[] = [
     body: (
       <>
         <p>The Emotional Travel™ Assessment and initial destination discovery are currently offered without charge.</p>
-        <p>Velari may introduce paid products, premium features, personalized itinerary services, subscriptions, booking services, or other paid offerings in the future.</p>
+        <p>Velari™ may introduce paid products, premium features, personalized itinerary services, subscriptions, booking services, or other paid offerings in the future.</p>
         <p>If a service requires payment, the applicable price and material purchase terms will be displayed before you complete the purchase.</p>
-        <p>Velari will not charge you solely for completing the free Emotional Travel™ Assessment unless you affirmatively choose a paid service.</p>
+        <p>Velari™ will not charge you solely for completing the free Emotional Travel™ Assessment unless you affirmatively choose a paid service.</p>
       </>
     ),
   },
@@ -180,13 +180,13 @@ const sections: LegalSection[] = [
     title: "10. Accounts",
     body: (
       <>
-        <p>Certain Velari features require an account.</p>
+        <p>Certain Velari™ features require an account.</p>
         <p>You agree to:</p>
         <ul>
           <li>Provide accurate account information</li>
           <li>Keep your login credentials confidential</li>
           <li>Maintain accurate contact information</li>
-          <li>Notify Velari of suspected unauthorized account access</li>
+          <li>Notify Velari™ of suspected unauthorized account access</li>
           <li>Accept responsibility for activity occurring through your account to the extent permitted by law</li>
         </ul>
         <p>You may not create an account using another person&#39;s identity without authorization.</p>
@@ -209,17 +209,17 @@ const sections: LegalSection[] = [
     title: "12. Acceptable Use",
     body: (
       <>
-        <p>You may not use Velari to:</p>
+        <p>You may not use Velari™ to:</p>
         <ul>
           <li>Violate any applicable law</li>
-          <li>Attempt to gain unauthorized access to Velari systems</li>
+          <li>Attempt to gain unauthorized access to Velari™ systems</li>
           <li>Interfere with the operation or security of the platform</li>
           <li>Introduce malware or malicious code</li>
-          <li>Scrape or systematically extract Velari content without permission</li>
-          <li>Reverse engineer or attempt to replicate Velari&#39;s proprietary technology except where legally permitted</li>
+          <li>Scrape or systematically extract Velari™ content without permission</li>
+          <li>Reverse engineer or attempt to replicate Velari™&#39;s proprietary technology except where legally permitted</li>
           <li>Misrepresent your identity</li>
-          <li>Use Velari to harm, harass, defraud, or impersonate another person</li>
-          <li>Use Velari&#39;s content or technology to build a substantially competing service without authorization</li>
+          <li>Use Velari™ to harm, harass, defraud, or impersonate another person</li>
+          <li>Use Velari™&#39;s content or technology to build a substantially competing service without authorization</li>
           <li>Circumvent security, usage, or account restrictions</li>
         </ul>
         <p>We may suspend or terminate access for violations of these Terms.</p>
@@ -231,8 +231,8 @@ const sections: LegalSection[] = [
     title: "13. Your Information and Content",
     body: (
       <>
-        <p>You retain ownership of information and content you submit to Velari.</p>
-        <p>You grant Velari a limited right to process, store, reproduce, and use that information as reasonably necessary to:</p>
+        <p>You retain ownership of information and content you submit to Velari™.</p>
+        <p>You grant Velari™ a limited right to process, store, reproduce, and use that information as reasonably necessary to:</p>
         <ul>
           <li>Operate the service</li>
           <li>Create your Emotional Travel™ profile</li>
@@ -247,14 +247,14 @@ const sections: LegalSection[] = [
   },
   {
     id: "velari-intellectual-property",
-    title: "14. Velari Intellectual Property",
+    title: "14. Velari™ Intellectual Property",
     body: (
       <>
-        <p>Velari and its associated content, branding, technology, designs, software, methodologies, and original materials are owned by or licensed to Velari and are protected by applicable intellectual-property laws.</p>
+        <p>Velari™ and its associated content, branding, technology, designs, software, methodologies, and original materials are owned by or licensed to Velari™ and are protected by applicable intellectual-property laws.</p>
         <p>This includes, where applicable:</p>
         <ul>
-          <li>Velari</li>
-          <li>Velari Travel</li>
+          <li>Velari™</li>
+          <li>Velari™ Travel</li>
           <li>Emotional Travel™</li>
           <li>Assessment structure and methodology</li>
           <li>Recommendation systems</li>
@@ -264,8 +264,8 @@ const sections: LegalSection[] = [
           <li>Graphics</li>
           <li>Logos</li>
         </ul>
-        <p>Your use of Velari does not grant you ownership of Velari intellectual property.</p>
-        <p>You may use Velari only for lawful personal purposes unless Velari provides written permission for another use.</p>
+        <p>Your use of Velari™ does not grant you ownership of Velari™ intellectual property.</p>
+        <p>You may use Velari™ only for lawful personal purposes unless Velari™ provides written permission for another use.</p>
       </>
     ),
   },
@@ -274,7 +274,7 @@ const sections: LegalSection[] = [
     title: "15. Third-Party Content and Services",
     body: (
       <>
-        <p>Velari may reference or link to third-party:</p>
+        <p>Velari™ may reference or link to third-party:</p>
         <ul>
           <li>Hotels</li>
           <li>Resorts</li>
@@ -288,7 +288,7 @@ const sections: LegalSection[] = [
           <li>Other products or services</li>
         </ul>
         <p>A recommendation or link does not guarantee or warrant the quality, availability, safety, price, accuracy, or suitability of a third-party service.</p>
-        <p>Third-party services operate independently from Velari.</p>
+        <p>Third-party services operate independently from Velari™.</p>
       </>
     ),
   },
@@ -309,8 +309,8 @@ const sections: LegalSection[] = [
     title: "17. No Professional Advice",
     body: (
       <>
-        <p>Information provided through Velari is intended for travel planning and informational purposes.</p>
-        <p>Velari does not provide:</p>
+        <p>Information provided through Velari™ is intended for travel planning and informational purposes.</p>
+        <p>Velari™ does not provide:</p>
         <ul>
           <li>Medical advice</li>
           <li>Mental health advice</li>
@@ -328,8 +328,8 @@ const sections: LegalSection[] = [
     title: "18. Disclaimer of Warranties",
     body: (
       <>
-        <p>To the fullest extent permitted by law, Velari is provided on an &quot;as is&quot; and &quot;as available&quot; basis.</p>
-        <p>Velari does not guarantee that the service will:</p>
+        <p>To the fullest extent permitted by law, Velari™ is provided on an &quot;as is&quot; and &quot;as available&quot; basis.</p>
+        <p>Velari™ does not guarantee that the service will:</p>
         <ul>
           <li>Always be available</li>
           <li>Operate without interruption</li>
@@ -347,8 +347,8 @@ const sections: LegalSection[] = [
     title: "19. Limitation of Liability",
     body: (
       <>
-        <p>To the fullest extent permitted by applicable law, Velari will not be liable for indirect, incidental, special, consequential, or punitive damages arising from your use of the service.</p>
-        <p>Velari is not responsible for losses arising from the acts, omissions, cancellations, failures, pricing, availability, safety, or policies of independent third-party travel providers.</p>
+        <p>To the fullest extent permitted by applicable law, Velari™ will not be liable for indirect, incidental, special, consequential, or punitive damages arising from your use of the service.</p>
+        <p>Velari™ is not responsible for losses arising from the acts, omissions, cancellations, failures, pricing, availability, safety, or policies of independent third-party travel providers.</p>
         <p>Nothing in these Terms limits liability where such limitation is prohibited by law.</p>
       </>
     ),
@@ -358,7 +358,7 @@ const sections: LegalSection[] = [
     title: "20. Indemnification",
     body: (
       <>
-        <p>To the extent permitted by law, you agree to indemnify and hold Velari harmless from claims, liabilities, damages, or reasonable expenses resulting from your unlawful use of Velari, violation of these Terms, or infringement of the rights of another person.</p>
+        <p>To the extent permitted by law, you agree to indemnify and hold Velari™ harmless from claims, liabilities, damages, or reasonable expenses resulting from your unlawful use of Velari™, violation of these Terms, or infringement of the rights of another person.</p>
       </>
     ),
   },
@@ -367,23 +367,23 @@ const sections: LegalSection[] = [
     title: "21. Suspension and Termination",
     body: (
       <>
-        <p>Velari may suspend or terminate access to the platform if we reasonably believe that:</p>
+        <p>Velari™ may suspend or terminate access to the platform if we reasonably believe that:</p>
         <ul>
           <li>These Terms have been violated</li>
           <li>The platform is being abused</li>
           <li>Fraudulent or unlawful activity is occurring</li>
           <li>Continued access creates a security or legal risk</li>
         </ul>
-        <p>You may stop using Velari or request deletion of your account at any time.</p>
+        <p>You may stop using Velari™ or request deletion of your account at any time.</p>
       </>
     ),
   },
   {
     id: "changes-to-velari",
-    title: "22. Changes to Velari",
+    title: "22. Changes to Velari™",
     body: (
       <>
-        <p>Velari is an evolving platform.</p>
+        <p>Velari™ is an evolving platform.</p>
         <p>We may add, remove, modify, or discontinue features as the service develops.</p>
         <p>Where required by law, users will receive appropriate notice of material changes affecting their rights.</p>
       </>
@@ -397,7 +397,7 @@ const sections: LegalSection[] = [
         <p>We may update these Terms from time to time.</p>
         <p>The effective date at the top of the Terms will indicate when they were most recently revised.</p>
         <p>Material changes will be communicated where required by applicable law.</p>
-        <p>Continued use of Velari after updated Terms become effective constitutes acceptance to the extent permitted by law.</p>
+        <p>Continued use of Velari™ after updated Terms become effective constitutes acceptance to the extent permitted by law.</p>
       </>
     ),
   },
@@ -425,7 +425,7 @@ const sections: LegalSection[] = [
     title: "26. Entire Agreement",
     body: (
       <>
-        <p>These Terms, together with the Privacy Policy and any additional terms presented for a specific Velari service, constitute the agreement between you and Velari concerning your use of the service.</p>
+        <p>These Terms, together with the Privacy Policy and any additional terms presented for a specific Velari™ service, constitute the agreement between you and Velari™ concerning your use of the service.</p>
       </>
     ),
   },
@@ -435,7 +435,7 @@ const sections: LegalSection[] = [
     body: (
       <>
         <p>Questions regarding these Terms may be directed to:</p>
-        <p>Velari Travel</p>
+        <p>Velari™ Travel</p>
         <p>Email: <a href="mailto:hello@velaritravel.com">hello@velaritravel.com</a></p>
         <p>Phone: (830) 433-7323</p>
       </>
@@ -448,7 +448,7 @@ export default function TermsOfServiceContainer() {
     <LegalPage
       title="Terms of Service"
       eyebrow="Legal"
-      description="The terms governing your access to and use of Velari Travel."
+      description="The terms governing your access to and use of Velari™ Travel."
       updated="September 18, 2026"
       dateLabel="Effective Date"
       stickyHero
@@ -456,9 +456,9 @@ export default function TermsOfServiceContainer() {
       contactLabel="these Terms"
       introduction={
         <>
-          <p>These Terms of Service (&quot;Terms&quot;) govern your access to and use of VelariTravel.com and the services provided by Velari Travel (&quot;Velari,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;).</p>
-          <p>By accessing Velari, creating an account, completing the Emotional Travel™ Assessment, or using our services, you agree to these Terms and our Privacy Policy.</p>
-          <p>If you do not agree with these Terms, please do not use Velari.</p>
+          <p>These Terms of Service (&quot;Terms&quot;) govern your access to and use of VelariTravel.com and the services provided by Velari™ Travel (&quot;Velari™,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;).</p>
+          <p>By accessing Velari™, creating an account, completing the Emotional Travel™ Assessment, or using our services, you agree to these Terms and our Privacy Policy.</p>
+          <p>If you do not agree with these Terms, please do not use Velari™.</p>
         </>
       }
       sections={sections}

@@ -77,7 +77,7 @@ export function SampleItineraryPage({ journey }: { journey: SampleJourney }) {
       <section className="sample-conversion">
         <small>Ready for something personal?</small>
         <h2>Your journey should feel like yours.</h2>
-        <p>Tell us how you feel, what you need, and how you want to travel. Velari will build your own matched experience.</p>
+        <p>Tell us how you feel, what you need, and how you want to travel. Velari™ will build your own matched experience.</p>
         <Link href="/journey">Begin Your Emotional Journey <ArrowRight size={16} /></Link>
       </section>
       <FooterSection />

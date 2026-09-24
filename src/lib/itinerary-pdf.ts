@@ -36,7 +36,7 @@ export async function downloadItineraryPdf(history: JourneyHistory, city: string
     doc.setTextColor(...olive);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(11);
-    doc.text("VELARI", margin, 14);
+    doc.text("VELARI™", margin, 14);
     doc.setDrawColor(...gold);
     doc.line(margin, 18, pageWidth - margin, 18);
     doc.setTextColor(...muted);
@@ -62,7 +62,7 @@ export async function downloadItineraryPdf(history: JourneyHistory, city: string
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(13);
-  doc.text("VELARI", margin, 14);
+  doc.text("VELARI™", margin, 14);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.text("PERSONALIZED TRAVEL ITINERARY", pageWidth - margin, 14, { align: "right" });
@@ -203,7 +203,7 @@ export async function downloadItineraryPdf(history: JourneyHistory, city: string
     doc.setTextColor(...muted);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.5);
-    doc.text(`Velari personalized journey  |  Page ${page} of ${pages}`, pageWidth / 2, pageHeight - 8, { align: "center" });
+    doc.text(`Velari™ personalized journey  |  Page ${page} of ${pages}`, pageWidth / 2, pageHeight - 8, { align: "center" });
   }
 
   doc.save(`velari-${safeFilename(city)}-itinerary.pdf`);

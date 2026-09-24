@@ -29,7 +29,7 @@ const analysisSteps = [
   { title: "Curating your matches", detail: "Selecting the journeys that fit you best", icon: MapPin },
 ];
 
-function ResultsSkeleton({ message = "Reading your emotional travel profile…" }: { message?: string }) {
+function ResultsSkeleton({ message = "Reading your Emotional Travel™ profile…" }: { message?: string }) {
   const confirmingPayment = message.startsWith("Confirming");
   const [activeStep, setActiveStep] = useState(confirmingPayment ? 0 : 1);
 
@@ -86,7 +86,7 @@ export function ResultsPage() {
   const historyId = searchParams.get("historyId");
   const [history, setHistory] = useState<JourneyHistory | null>(null);
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState("Reading your emotional travel profile…");
+  const [message, setMessage] = useState("Reading your Emotional Travel™ profile…");
   const [error, setError] = useState<{ message: string; notFound?: boolean; analysisFailed?: boolean } | null>(null);
   const [selectedPropertyId, setSelectedPropertyId] = useState("");
   const [regenerating, setRegenerating] = useState(false);
@@ -255,7 +255,7 @@ export function ResultsPage() {
   const tags = (history.travelThemes || []).slice(0, 3);
 
   return <main className="results-page"><NavbarSection activePage="none" />
-    <section className="results-hero"><div className="results-shade" /><div><small>YOUR EMOTIONAL TRAVEL PROFILE</small><h1>{archetype}</h1><p>{heroDescription}</p><div className="result-tags">{(tags.length ? tags : [profile?.zodiacSign, profile?.currentEnergy, profile?.travelStyle]).filter(Boolean).map((tag) => <span key={tag}>{tag}</span>)}</div></div></section>
+    <section className="results-hero"><div className="results-shade" /><div><small>YOUR EMOTIONAL TRAVEL™ PROFILE</small><h1>{archetype}</h1><p>{heroDescription}</p><div className="result-tags">{(tags.length ? tags : [profile?.zodiacSign, profile?.currentEnergy, profile?.travelStyle]).filter(Boolean).map((tag) => <span key={tag}>{tag}</span>)}</div></div></section>
     <section className="matched"><h2>Your Matched Destinations</h2><p>Selected for your unique emotional, astrological, and travel profile.<br />Choose a destination to create the full day-by-day itinerary.</p><button type="button" className="match-link" onClick={() => void regenerateSuggestions()} disabled={regenerating || Boolean(selectedPropertyId)}>{regenerating ? <><Loader2 className="spin" size={13} /> Finding more options…</> : <><RefreshCw size={13} /> Show other options</>}</button><div className="match-grid">{history.suggestedCities.map((city, index) => {
       const image = city.cityImage?.find(Boolean) || fallbackImages[index % fallbackImages.length];
       const isCreating = selectedPropertyId === city.propertyId;

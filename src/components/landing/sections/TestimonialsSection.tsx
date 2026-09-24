@@ -5,8 +5,8 @@ import Image from "next/image";
 import { useState } from "react";
 
 const testimonials = [
-  { name: "Sophia Martin", trip: "Slow Journey – Japan", image: "/images/testimonial-1.png", quote: "Velari understood that I needed quiet, beauty, and room to breathe. Every stop felt considered, from the peaceful gardens to the intimate local restaurants." },
-  { name: "Imran Hossain", trip: "Visit Visa – UAE", image: "/images/testimonial-2.png", quote: "Burned out after months of work, I used Velari’s Deep Recharging filter. The AI created a calming Kyoto escape with hidden temples, onsen baths, ramen spots, and a minimalist hotel, feeling personal." },
+  { name: "Sophia Martin", trip: "Slow Journey – Japan", image: "/images/testimonial-1.png", quote: "Velari™ understood that I needed quiet, beauty, and room to breathe. Every stop felt considered, from the peaceful gardens to the intimate local restaurants." },
+  { name: "Imran Hossain", trip: "Visit Visa – UAE", image: "/images/testimonial-2.png", quote: "Burned out after months of work, I used Velari™’s Deep Recharging filter. The AI created a calming Kyoto escape with hidden temples, onsen baths, ramen spots, and a minimalist hotel, feeling personal." },
   { name: "Noah Williams", trip: "Cultural Escape – Greece", image: "/images/testimonial-3.png", quote: "It felt less like an itinerary and more like a journey made by someone who truly knew me. I returned inspired, rested, and completely renewed." },
 ];
 

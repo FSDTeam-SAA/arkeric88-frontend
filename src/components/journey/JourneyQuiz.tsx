@@ -328,7 +328,7 @@ export function JourneyQuiz() {
         body: JSON.stringify({
           amount,
           currency: "usd",
-          description: "Velari personalized emotional journey",
+          description: "Velari™ personalized emotional journey",
           nameOnCard: session?.user?.name,
           email: session?.user?.email,
           quiz: questions.map((question) => ({
@@ -389,7 +389,7 @@ export function JourneyQuiz() {
   return <main className="quiz-page">
     <header className="quiz-header">
       <button onClick={() => step ? setStep(step - 1) : router.push("/")}><ArrowLeft size={15} /> Back</button>
-      <Image src="/images/logo.png" alt="Velari" width={125} height={44} priority />
+      <Image src="/images/logo.png" alt="Velari™" width={125} height={44} priority />
       <button onClick={saveAndExit}>Save &amp; Exit</button>
     </header>
     <div className="quiz-progress" aria-hidden="true"><span style={{ width: `${((step + 1) / totalQuestions) * 100}%` }} /></div>
