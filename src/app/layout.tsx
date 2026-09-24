@@ -11,7 +11,7 @@ const cormorantGaramond = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "Velari | Travel That Understands You",
+  title: "Velari™ | Travel That Understands You",
   description: "Personalized luxury journeys designed around how you feel.",
   icons: {
     icon: "/images/logo.png",

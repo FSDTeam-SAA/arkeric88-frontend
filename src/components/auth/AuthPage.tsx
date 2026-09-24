@@ -199,7 +199,7 @@ function AuthPageContent({ mode }: { mode: Mode }) {
               <Link href="/">
                 <Image
                   src="/images/logo.png"
-                  alt="Velari"
+                  alt="Velari™"
                   width={500}
                   height={500}
                   className="h-[52px] w-[133px] object-contain"

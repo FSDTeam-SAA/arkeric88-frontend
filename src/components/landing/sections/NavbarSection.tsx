@@ -50,7 +50,7 @@ export function NavbarSection({ activePage = "home", accountMode = false }: Navb
   return (
     <header className="navbar">
       <div className="navbar-container mx-auto">
-        <Link href="/" className="logo-panel" aria-label="Velari home"><Image src="/images/logo.png" alt="Velari" width={180} height={59} className="logo" priority /></Link>
+        <Link href="/" className="logo-panel" aria-label="Velari™ home"><Image src="/images/logo.png" alt="Velari™" width={180} height={59} className="logo" priority /></Link>
         <nav className={menuOpen ? "nav-links open" : "nav-links"} aria-label="Main navigation">
           <Link href="/" className={activePage === "home" ? "active" : ""} onClick={closeMenu}>Home</Link><Link href="/how-it-works" className={activePage === "how-it-works" ? "active" : ""} onClick={closeMenu}>How It Works</Link>
           {accountMode || status === "authenticated" ? <Link href="/account/personal-information" onClick={closeMenu}>My Account</Link> : <Link href="/login" onClick={closeMenu}>Log In</Link>}

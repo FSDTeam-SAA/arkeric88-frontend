@@ -6,17 +6,17 @@ export function FooterSection() {
     <footer id="footer">
       <div className="footer-grid">
         <div className="footer-brand">
-          <Link href="/" aria-label="Velari home">
+          <Link href="/" aria-label="Velari™ home">
             <Image
               src="/images/logo.png"
-              alt="Velari"
+              alt="Velari™"
               width={170}
               height={56}
               className="footer-logo"
             />
           </Link>
           <p>
-            Discover the destinations your soul truly needs. Velari combines
+            Discover the destinations your soul truly needs. Velari™ combines
             emotional intelligence, zodiac insights, and cutting-edge AI to
             craft personalized luxury travel experiences designed around you.
           </p>
@@ -55,10 +55,10 @@ export function FooterSection() {
         </div>
       </div>
       <div className="copyright">
-        <span>© 2026 Velari. All rights reserved.</span>
+        <span>© 2026 Velari™. All rights reserved.</span>
         <span>
           <Link href="/privacy-policy">Privacy Policy</Link> •{" "}
-          <Link href="/terms-of-service">Terms &amp; Conditions</Link>
+          <Link href="/terms-of-service">Terms of Service</Link>
         </span>
       </div>
     </footer>

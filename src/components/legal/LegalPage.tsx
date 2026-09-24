@@ -62,7 +62,7 @@ export function LegalPage({
                 ))}
               </ol>
               <Link href="/" className="legal-toc-home">
-                <ArrowLeft size={14} /> Return to Velari
+                <ArrowLeft size={14} /> Return to Velari™
               </Link>
             </div>
           </aside>
