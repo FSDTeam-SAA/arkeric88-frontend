@@ -1,6 +1,4 @@
-export type WellnessArchetypeId = "burned_out_achiever" | "transformer" | "seeker" | "optimizer" | "escapist" | "reconnector";
-
-export type QuizOption = string | {
+export type QuizOption = {
   value: string;
   label: string;
   description?: string;
@@ -9,409 +7,208 @@ export type QuizOption = string | {
 export type QuizQuestion = {
   key: string;
   title: string;
-  prompt?: string;
-  kind?: "options" | "cards" | "date" | "range" | "text" | "timing" | "archetypes";
+  prompt: string;
+  whyWeAsk: string;
+  kind?: "options" | "cards" | "party" | "restrictions" | "departure" | "timing" | "range";
   options?: QuizOption[];
   multiple?: boolean;
   maxSelections?: number;
   required?: boolean;
-  mapsTo?: string[];
+  otherOption?: string;
 };
 
-export type WellnessArchetype = {
-  id: WellnessArchetypeId;
-  name: string;
-  description: string;
-  coreTraits: string[];
-  needs: string[];
-  avoid: string[];
-  sampleRetreats: string[];
-  questions: QuizQuestion[];
-};
-
-export const wellnessArchetypes: WellnessArchetype[] = [
-  {
-    id: "burned_out_achiever",
-    name: "Burned-Out Achiever",
-    description: "I am successful and driven, but mentally or physically exhausted.",
-    coreTraits: ["High-performing", "Mentally exhausted", "Overstimulated"],
-    needs: ["Nervous system regulation", "Quiet luxury", "Restorative sleep"],
-    avoid: ["Aggressive programming", "Forced socialization"],
-    sampleRetreats: ["Sensei Lanai", "COMO Shambhala", "Kamalaya"],
-    questions: [
-      {
-        key: "burnout_recovery_priority",
-        title: "What most needs to recover right now?",
-        options: ["Restorative sleep", "My nervous system", "Mental clarity", "Physical energy"],
-      },
-      {
-        key: "burnout_current_pressure",
-        title: "How does pressure show up in your daily life?",
-        options: ["I am always switched on", "I feel mentally overloaded", "My sleep is suffering", "I have very little time for myself"],
-      },
-      {
-        key: "burnout_support_style",
-        title: "What kind of support would feel restorative?",
-        options: ["Private and self-paced", "Gentle expert guidance", "A clear but spacious program", "Mostly rest with optional activities"],
-      },
-      {
-        key: "burnout_social_boundary",
-        title: "How much social interaction feels right?",
-        options: ["As little as possible", "A few meaningful interactions", "Small calm groups", "I am open to connecting when it feels natural"],
-      },
-    ],
-  },
-  {
-    id: "transformer",
-    name: "Transformer",
-    description: "I am ready for growth, challenge, and a meaningful personal shift.",
-    coreTraits: ["Growth-oriented", "Challenge-seeking", "Open to discomfort"],
-    needs: ["Structure", "Accountability", "Physical engagement"],
-    avoid: ["Unstructured retreats", "Passive retreats"],
-    sampleRetreats: ["The Ranch Malibu", "Lanserhof", "SHA Wellness"],
-    questions: [
-      {
-        key: "transformation_focus",
-        title: "Where do you most want to create change?",
-        options: ["Physical vitality", "Habits and discipline", "Confidence and resilience", "A major life transition"],
-      },
-      {
-        key: "transformation_challenge",
-        title: "How much challenge are you ready for?",
-        options: ["Gentle momentum", "A meaningful stretch", "A demanding reset", "Push me beyond my comfort zone"],
-      },
-      {
-        key: "transformation_structure",
-        title: "What keeps you most engaged?",
-        options: ["A clear daily schedule", "Expert coaching", "Measurable milestones", "Shared accountability"],
-      },
-      {
-        key: "transformation_movement",
-        title: "How should movement support your transformation?",
-        options: ["Daily functional movement", "Strength and conditioning", "Hiking and outdoor challenge", "A varied physical program"],
-      },
-    ],
-  },
-  {
-    id: "seeker",
-    name: "Seeker",
-    description: "I want reflection, meaning, and a deeper inner or spiritual connection.",
-    coreTraits: ["Introspective", "Spiritually curious", "Meaning-seeking"],
-    needs: ["Mindfulness", "Nature immersion", "Emotional grounding"],
-    avoid: ["Clinical environments", "Data-heavy language"],
-    sampleRetreats: ["Ananda", "Fivelements", "Blue Spirit Costa Rica"],
-    questions: [
-      {
-        key: "seeker_intention",
-        title: "What are you hoping to understand more deeply?",
-        options: ["My purpose", "My emotions", "A life decision", "My spiritual path"],
-      },
-      {
-        key: "seeker_practice",
-        title: "Which practice feels most supportive?",
-        options: ["Meditation and silence", "Yoga and breathwork", "Ritual and spiritual guidance", "Journaling and reflection"],
-      },
-      {
-        key: "seeker_nature",
-        title: "How would you like nature to be part of the journey?",
-        options: ["Deep immersion every day", "A peaceful setting for reflection", "Guided nature experiences", "A balance of nature and comfort"],
-      },
-      {
-        key: "seeker_guidance",
-        title: "How much guidance would you welcome?",
-        options: ["Mostly solitary exploration", "Occasional one-to-one guidance", "A guided daily practice", "A supportive like-minded group"],
-      },
-    ],
-  },
-  {
-    id: "optimizer",
-    name: "Optimizer",
-    description: "I value evidence, measurable outcomes, and long-term performance.",
-    coreTraits: ["Performance-oriented", "Data-driven", "Biohacking-curious"],
-    needs: ["Diagnostics", "Measurable outcomes", "Longevity focus"],
-    avoid: ["Vague wellness offerings", "Unstructured wellness offerings"],
-    sampleRetreats: ["Clinique La Prairie", "Velaa", "RAKxa"],
-    questions: [
-      {
-        key: "optimizer_outcome",
-        title: "Which outcome matters most to you?",
-        options: ["Longevity and prevention", "Energy and performance", "Sleep and recovery", "Metabolic health"],
-      },
-      {
-        key: "optimizer_diagnostics",
-        title: "How much diagnostic insight do you want?",
-        options: ["A focused health assessment", "Comprehensive testing", "Continuous measurement", "Only tests that change the plan"],
-      },
-      {
-        key: "optimizer_tracking",
-        title: "How would you like progress to be measured?",
-        options: ["Clear before-and-after metrics", "Daily data and feedback", "Expert interpretation", "A practical long-term plan"],
-      },
-      {
-        key: "optimizer_program",
-        title: "What program style suits you best?",
-        options: ["Highly structured and clinical", "Evidence-led with luxury", "Intensive but time-efficient", "Personalized with room to recharge"],
-      },
-    ],
-  },
-  {
-    id: "escapist",
-    name: "Escapist",
-    description: "I feel emotionally drained and want beauty, freedom, and simplicity.",
-    coreTraits: ["Emotionally drained", "Craving beauty", "Craving simplicity"],
-    needs: ["Sensory reset", "Freedom", "Stunning environments"],
-    avoid: ["Heavy structure", "Intensity", "Group pressure"],
-    sampleRetreats: ["Soneva Soul", "Amangiri", "Post Ranch Inn"],
-    questions: [
-      {
-        key: "escape_from",
-        title: "What do you most want a break from?",
-        options: ["Noise and stimulation", "Responsibility and decisions", "Routine and repetition", "Emotional heaviness"],
-      },
-      {
-        key: "escape_sensation",
-        title: "What would make you exhale the moment you arrive?",
-        options: ["A breathtaking view", "Silence and privacy", "Warmth, water, and sunshine", "Beautiful design and effortless service"],
-      },
-      {
-        key: "escape_freedom",
-        title: "How much structure do you want?",
-        options: ["Almost none", "A few optional rituals", "One anchor activity each day", "A gentle plan I can change anytime"],
-      },
-      {
-        key: "escape_reset",
-        title: "What kind of reset sounds most appealing?",
-        options: ["Digital disconnection", "Sensory indulgence", "Creative inspiration", "Doing absolutely nothing"],
-      },
-    ],
-  },
-  {
-    id: "reconnector",
-    name: "Reconnector",
-    description: "I want emotional warmth and meaningful time with people I care about.",
-    coreTraits: ["Relationship-oriented", "Seeking shared experiences"],
-    needs: ["Intimacy", "Emotional warmth", "Softer structure"],
-    avoid: ["Solo-only experiences", "Cold clinical settings"],
-    sampleRetreats: ["BodyHoliday", "Miraval Arizona", "Zulal"],
-    questions: [
-      {
-        key: "reconnection_focus",
-        title: "Who or what do you most want to reconnect with?",
-        options: ["My partner", "Family or close friends", "Myself before reconnecting with others", "A sense of community"],
-      },
-      {
-        key: "reconnection_experience",
-        title: "Which shared experience feels most meaningful?",
-        options: ["Unhurried conversations", "Wellness rituals together", "Play and adventure", "Learning something new together"],
-      },
-      {
-        key: "reconnection_tone",
-        title: "What emotional tone should the journey have?",
-        options: ["Warm and nurturing", "Joyful and celebratory", "Quiet and intimate", "Healing and restorative"],
-      },
-      {
-        key: "reconnection_balance",
-        title: "What balance of togetherness feels right?",
-        options: ["Almost everything together", "Shared highlights with personal downtime", "A balanced mix", "Plenty of individual space"],
-      },
-    ],
-  },
+export const restrictionOptions: QuizOption[] = [
+  { value: "mobility_accessibility", label: "Mobility or accessibility" },
+  { value: "food_dietary", label: "Food allergy or dietary need" },
+  { value: "no_long_drives", label: "No long drives" },
+  { value: "no_intense_activity", label: "No intense activity" },
+  { value: "no_water_activities", label: "No water activities" },
+  { value: "avoid_extreme_heat", label: "Avoid extreme heat" },
+  { value: "avoid_cold_weather", label: "Avoid cold weather" },
+  { value: "other", label: "Other" },
 ];
 
-export const commonJourneyQuestions: QuizQuestion[] = [
+export const travelPeriodOptions: QuizOption[] = [
+  { value: "spring", label: "Spring" },
+  { value: "summer", label: "Summer" },
+  { value: "autumn", label: "Autumn" },
+  { value: "winter", label: "Winter" },
+  { value: "january", label: "January" },
+  { value: "february", label: "February" },
+  { value: "march", label: "March" },
+  { value: "april", label: "April" },
+  { value: "may", label: "May" },
+  { value: "june", label: "June" },
+  { value: "july", label: "July" },
+  { value: "august", label: "August" },
+  { value: "september", label: "September" },
+  { value: "october", label: "October" },
+  { value: "november", label: "November" },
+  { value: "december", label: "December" },
+];
+
+export const journeyQuestions: QuizQuestion[] = [
   {
-    key: "break_from",
-    title: "What do you most want a break from?",
-    mapsTo: ["emotional_tone", "transform_focus"],
+    key: "recent_feelings",
+    title: "How have you been feeling lately?",
+    prompt: "Select up to two.",
+    whyWeAsk: "Your starting point helps us understand what you want travel to change or add.",
+    multiple: true,
+    maxSelections: 2,
+    otherOption: "something_else",
     options: [
-      { value: "noise_stimulation", label: "Noise and stimulation" },
-      { value: "responsibility_decisions", label: "Responsibility and decisions" },
-      { value: "routine_repetition", label: "Routine and repetition" },
-      { value: "emotional_heaviness", label: "Emotional heaviness" },
+      { value: "stretched_thin", label: "Stretched thin" },
+      { value: "stuck_in_routine", label: "Stuck in a routine" },
+      { value: "disconnected", label: "Disconnected" },
+      { value: "curious", label: "Curious" },
+      { value: "energized", label: "Energized" },
+      { value: "turning_point", label: "At a turning point" },
+      { value: "content_ready", label: "Content and ready to enjoy life" },
+      { value: "something_else", label: "Something else" },
     ],
   },
   {
-    key: "arrival_priority",
-    title: "What would make you exhale the moment you arrive?",
-    mapsTo: ["nature_score", "emotional_safety", "solo_privacy", "luxury_score"],
+    key: "trip_goals",
+    title: "What are you hoping this trip gives you?",
+    prompt: "Select up to two. You can change your mind later.",
+    whyWeAsk: "The feeling you want guides our recommendations. There is more than one way to get there.",
+    kind: "cards",
+    multiple: true,
+    maxSelections: 2,
     options: [
-      { value: "breathtaking_view", label: "A breathtaking view" },
-      { value: "silence_privacy", label: "Silence and privacy" },
-      { value: "warmth_water_sunshine", label: "Warmth, water, and sunshine" },
-      { value: "beautiful_design_service", label: "Beautiful design and effortless service" },
+      { value: "restoration", label: "Restoration", description: "Space to slow down and feel less pulled in every direction" },
+      { value: "connection", label: "Connection", description: "Meaningful time with people who matter to you" },
+      { value: "discovery", label: "Discovery", description: "New places, flavors, stories and perspectives" },
+      { value: "adventure", label: "Adventure", description: "Movement, challenge and doing something new" },
+      { value: "inspiration", label: "Inspiration", description: "Fresh ideas through art, learning or creativity" },
+      { value: "celebration", label: "Celebration", description: "Joy, pleasure and a moment worth remembering" },
+      { value: "reflection", label: "Reflection", description: "Quiet and perspective to think about what matters" },
+      { value: "growth", label: "Growth", description: "An experience that helps you stretch or make a change" },
     ],
   },
   {
-    key: "retreat_structure",
-    title: "How much structure do you want, day to day?",
-    mapsTo: ["structure"],
+    key: "trip_prompt",
+    title: "What prompted this trip?",
+    prompt: "Choose one.",
+    whyWeAsk: "The reason for going helps us shape the trip around the moment you’re in.",
+    otherOption: "something_else",
     options: [
-      { value: "almost_none", label: "Almost none — I'll do what I feel like" },
-      { value: "optional_rituals", label: "A few optional rituals I can join or skip" },
-      { value: "one_daily_anchor", label: "One anchor activity a day, rest is free time" },
-      { value: "full_program", label: "A full program that's planned for me" },
+      { value: "need_a_break", label: "I need a break" },
+      { value: "time_with_someone", label: "Time with someone" },
+      { value: "celebrating", label: "I’m celebrating" },
+      { value: "curious_to_explore", label: "I’m curious to explore" },
+      { value: "ready_for_change", label: "I’m ready for change" },
+      { value: "change_of_scenery", label: "A change of scenery" },
+      { value: "no_particular_reason", label: "No particular reason" },
+      { value: "something_else", label: "Something else" },
     ],
   },
   {
-    key: "reset_style",
-    title: "What kind of reset sounds most appealing?",
-    mapsTo: ["transform_focus", "emotional_tone"],
+    key: "preferred_moments",
+    title: "Which moments sound most like your kind of trip?",
+    prompt: "Select up to three.",
+    whyWeAsk: "People can want the same feeling from very different experiences.",
+    multiple: true,
+    maxSelections: 3,
     options: [
-      { value: "digital_disconnection", label: "Digital disconnection" },
-      { value: "sensory_indulgence", label: "Sensory indulgence" },
-      { value: "creative_inspiration", label: "Creative inspiration" },
-      { value: "doing_nothing", label: "Doing absolutely nothing" },
+      { value: "food_drinks", label: "Memorable food and drinks" },
+      { value: "art_history_culture", label: "Art, history and culture" },
+      { value: "nature_wildlife", label: "Nature and wildlife" },
+      { value: "beaches_water", label: "Beaches and water" },
+      { value: "movement_adventure", label: "Movement and adventure" },
+      { value: "quiet_privacy", label: "Quiet and privacy" },
+      { value: "meeting_people", label: "Meeting people" },
+      { value: "spa_wellness", label: "Spa and wellness" },
+      { value: "music_nightlife", label: "Music and nightlife" },
+      { value: "learning_making", label: "Learning or making something" },
     ],
   },
   {
-    key: "physical_intensity",
-    title: "How intense do you want the physical side of this trip to be?",
-    mapsTo: ["physical_intensity"],
+    key: "preferred_environments",
+    title: "What setting draws you in?",
+    prompt: "Select up to two.",
+    whyWeAsk: "This helps us find places you’ll enjoy spending time in.",
+    multiple: true,
+    maxSelections: 2,
     options: [
-      { value: "gentle", label: "Gentle — minimal exertion, lots of rest" },
-      { value: "moderate", label: "Moderate — some movement, nothing demanding" },
-      { value: "challenging", label: "Challenging — I want to push myself physically" },
+      { value: "coast", label: "Coast" },
+      { value: "mountains", label: "Mountains" },
+      { value: "forest_jungle", label: "Forest or jungle" },
+      { value: "desert", label: "Desert" },
+      { value: "countryside", label: "Countryside" },
+      { value: "small_town", label: "Small town" },
+      { value: "vibrant_city", label: "Vibrant city" },
+      { value: "surprise_me", label: "Surprise me" },
+    ],
+  },
+  {
+    key: "trip_pace",
+    title: "What pace would feel good?",
+    prompt: "Choose one.",
+    whyWeAsk: "We use this to leave the right amount of space in your itinerary.",
+    options: [
+      { value: "mostly_open", label: "Mostly open time" },
+      { value: "one_highlight", label: "One highlight each day, with plenty of free time" },
+      { value: "balanced", label: "A balance of activities and downtime" },
+      { value: "full_days", label: "Full days with plenty to do" },
     ],
   },
   {
     key: "travel_party",
-    title: "Who will share this\njourney with you?",
-    mapsTo: ["solo_score", "couple_score", "social_score"],
-    kind: "cards",
+    title: "Who is traveling?",
+    prompt: "Choose one.",
+    whyWeAsk: "Your travel party affects rooms, activities and the pace of the trip.",
+    kind: "party",
     options: [
-      { value: "solo", label: "Solo" },
-      { value: "couple", label: "Couple" },
-      { value: "small_group", label: "Small Group" },
+      { value: "solo", label: "Just me" },
+      { value: "couple", label: "My partner and me" },
+      { value: "group", label: "Friends or a group" },
       { value: "family", label: "Family" },
     ],
   },
   {
-    key: "spirituality",
-    title: "How open are you to spiritual or ceremonial elements?",
-    mapsTo: ["spirituality"],
+    key: "activity_restrictions",
+    title: "Is there anything we should plan around or avoid?",
+    prompt: "Optional. Select a tag or tell us in your own words.",
+    whyWeAsk: "We’ll rule out options that conflict with your firm needs before matching.",
+    kind: "restrictions",
+    required: false,
+    multiple: true,
+    options: restrictionOptions,
+  },
+  {
+    key: "departure",
+    title: "Where would you leave from?",
+    prompt: "And how far are you open to traveling?",
+    whyWeAsk: "Travel time can make or break a trip, especially a short one.",
+    kind: "departure",
     options: [
-      { value: "none", label: "Not for me — I want wellness, not spirituality" },
-      { value: "light", label: "Open to light practices (yoga, meditation basics)" },
-      { value: "moderate", label: "I'd like this to be a real part of the experience" },
-      { value: "deep", label: "I want deep immersion (ashram, silent retreat, ceremony)" },
+      { value: "nearby", label: "Nearby" },
+      { value: "manageable_flight", label: "A manageable flight" },
+      { value: "anywhere", label: "Open to anywhere" },
     ],
   },
   {
     key: "travel_timing",
-    title: "When are you hoping to travel?",
-    mapsTo: ["best_season"],
+    title: "When can you go, and for how long?",
+    prompt: "Choose the timing you know today.",
+    whyWeAsk: "Timing helps us check routes, available stays and experiences.",
     kind: "timing",
     options: [
-      { value: "flexible", label: "Flexible / year-round" },
-      { value: "specific", label: "Specific season or month" },
-    ],
-  },
-  {
-    key: "planning_service",
-    title: "How would you like your trip organized?",
-    prompt: "This affects the planning support for your itinerary, not which retreat matches you.",
-    mapsTo: ["planning_service"],
-    options: [
-      { value: "loose", label: "Loosely — I'll figure it out as I go" },
-      { value: "well_planned", label: "Well planned — a clear day-by-day itinerary" },
-      { value: "hour_by_hour", label: "Hour by hour — I don't want to think about logistics" },
-    ],
-  },
-  {
-    key: "activity_restrictions",
-    title: "Are there any activities you'd like to avoid, or things you can't do?",
-    prompt: "For example: no hiking, water activities, long drives, extreme heat, or high-impact exercise.",
-    mapsTo: ["restriction_flags"],
-    kind: "text",
-    required: false,
-  },
-  {
-    key: "preferred_setting",
-    title: "What environment speaks to your soul?",
-    mapsTo: ["setting"],
-    multiple: true,
-    options: [
-      { value: "mountains", label: "Mountains" },
-      { value: "ocean_beach", label: "Ocean / Beach" },
-      { value: "jungle_rainforest", label: "Jungle / Rainforest" },
-      { value: "desert", label: "Desert" },
-      { value: "countryside_farmland", label: "Countryside / Farmland" },
-      { value: "lake", label: "Lake" },
-      { value: "city_urban", label: "City / Urban" },
-      { value: "no_preference", label: "No strong preference" },
+      { value: "exact_dates", label: "I have exact dates" },
+      { value: "flexible", label: "My dates are flexible" },
+      { value: "month_season", label: "I know the month or season" },
     ],
   },
   {
     key: "budget_per_night",
-    title: "What's your trip budget per night?",
-    mapsTo: ["avg_night", "budget_tier"],
+    title: "What is your maximum lodging budget per night?",
+    prompt: "USD per room, per night, for the guests you listed.",
+    whyWeAsk: "We check live lodging options for your dates before treating a destination as affordable.",
     kind: "range",
   },
-  {
-    key: "trip_length",
-    title: "How long is your trip?",
-    mapsTo: ["trip_length_context"],
-    options: [
-      { value: "1_3_nights", label: "1–3 nights" },
-      { value: "4_7_nights", label: "4–7 nights" },
-      { value: "1_2_weeks", label: "1–2 weeks" },
-      { value: "2_plus_weeks", label: "2+ weeks" },
-    ],
-  },
-  {
-    key: "transform_focus",
-    title: "What do you hope this trip gives you?",
-    prompt: "Select up to 3.",
-    mapsTo: ["transform_focus"],
-    multiple: true,
-    maxSelections: 3,
-    options: [
-      { value: "Burnout Recovery", label: "Burnout recovery" },
-      { value: "Longevity", label: "Longevity / healthy aging" },
-      { value: "Detox", label: "Detox" },
-      { value: "Weight Loss", label: "Weight loss" },
-      { value: "Spiritual Growth", label: "Spiritual growth" },
-      { value: "Emotional Healing", label: "Emotional healing" },
-      { value: "Nervous System Reset", label: "Nervous system reset" },
-      { value: "Fitness", label: "Fitness" },
-      { value: "Creativity", label: "Creativity" },
-      { value: "Relationship Repair", label: "Relationship repair" },
-      { value: "Community", label: "Community / connection" },
-      { value: "Sleep", label: "Better sleep" },
-      { value: "Digital Detox", label: "Digital detox" },
-      { value: "Cultural Immersion", label: "Cultural immersion" },
-    ],
-  },
 ];
 
-export const archetypeSelectionQuestion: QuizQuestion = {
-  key: "selected_archetype",
-  title: "Which wellness traveler feels\nmost like you right now?",
-  prompt: "Choose the closest fit for how you feel right now.",
-  mapsTo: ["archetypes"],
-  kind: "archetypes",
-};
-
-export const travelPeriodOptions: QuizOption[] = [
-  { value: "1", label: "January" }, { value: "2", label: "February" },
-  { value: "3", label: "March" }, { value: "4", label: "April" },
-  { value: "5", label: "May" }, { value: "6", label: "June" },
-  { value: "7", label: "July" }, { value: "8", label: "August" },
-  { value: "9", label: "September" }, { value: "10", label: "October" },
-  { value: "11", label: "November" }, { value: "12", label: "December" },
-];
-
-export function isWellnessArchetypeId(value: unknown): value is WellnessArchetypeId {
-  return wellnessArchetypes.some((archetype) => archetype.id === value);
+export function getQuizQuestions(): QuizQuestion[] {
+  return journeyQuestions;
 }
-
-export function getWellnessArchetype(value: unknown) {
-  return wellnessArchetypes.find((archetype) => archetype.id === value);
-}
-
-export function getQuizQuestions(value: unknown): QuizQuestion[] {
-  void value;
-  return [archetypeSelectionQuestion, ...commonJourneyQuestions];
-}
-
-export const archetypeQuestionKeys = new Set(wellnessArchetypes.flatMap((archetype) => archetype.questions.map((question) => question.key)));
