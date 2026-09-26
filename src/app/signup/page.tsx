@@ -1,1 +1,4 @@
-import AuthPage from "@/components/auth/AuthPage"; export default function Page(){ return <AuthPage mode="signup"/>; }
+import AuthPage from "@/components/auth/AuthPage";
+export default function Page() {
+  return <AuthPage mode="signup" />;
+}

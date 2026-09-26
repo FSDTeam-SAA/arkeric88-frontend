@@ -7,6 +7,12 @@ import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
+import {
+  CountryCode,
+  getCountries,
+  getCountryCallingCode,
+  parsePhoneNumberFromString,
+} from 'libphonenumber-js/min'
 
 type Mode = 'login' | 'signup' | 'forgot' | 'otp' | 'reset'
 const API = (
@@ -14,6 +20,15 @@ const API = (
   process.env.NEXT_PUBLIC_API_URL ||
   'http://localhost:5000/api/v1'
 ).replace(/\/$/, '')
+
+const regionNames = new Intl.DisplayNames(['en'], { type: 'region' })
+const phoneCountries = getCountries()
+  .map(code => ({
+    code,
+    name: regionNames.of(code) || code,
+    callingCode: getCountryCallingCode(code),
+  }))
+  .sort((a, b) => a.name.localeCompare(b.name))
 
 export default function AuthPage({ mode }: { mode: Mode }) {
   return (
@@ -31,6 +46,9 @@ function AuthPageContent({ mode }: { mode: Mode }) {
   >({})
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [phoneCountry, setPhoneCountry] = useState<CountryCode>('US')
+  const [phoneValue, setPhoneValue] = useState('')
+  const [phoneError, setPhoneError] = useState('')
   const emailFromUrl = params.get('email') || ''
   const callbackUrl = params.get('callbackUrl') || '/'
   useEffect(() => setVisiblePasswords({}), [mode])
@@ -65,9 +83,27 @@ function AuthPageContent({ mode }: { mode: Mode }) {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    setLoading(true)
     setError('')
+    setPhoneError('')
     const values = Object.fromEntries(new FormData(event.currentTarget))
+    let normalizedPhone = ''
+
+    if (mode === 'signup') {
+      const rawPhone = String(values.phone || '').trim()
+      const parsedPhone = parsePhoneNumberFromString(rawPhone, phoneCountry)
+      if (!parsedPhone?.isValid()) {
+        const countryName = regionNames.of(phoneCountry) || phoneCountry
+        const message =
+          phoneCountry === 'US'
+            ? 'Enter a valid US phone number, for example (201) 555-0123.'
+            : `Enter a valid phone number for ${countryName}.`
+        setPhoneError(message)
+        return
+      }
+      normalizedPhone = parsedPhone.number
+    }
+
+    setLoading(true)
     try {
       if (mode === 'login') {
         const result = await signIn('credentials', {
@@ -93,7 +129,7 @@ function AuthPageContent({ mode }: { mode: Mode }) {
           ? {
               fullName: values.fullName,
               email: values.email,
-              phone: values.phone,
+              phone: normalizedPhone,
               password: values.password,
             }
           : mode === 'forgot'
@@ -132,6 +168,63 @@ function AuthPageContent({ mode }: { mode: Mode }) {
       setLoading(false)
     }
   }
+  const selectedCallingCode = getCountryCallingCode(phoneCountry)
+  const phoneField = (
+    <label className="block text-base font-semibold leading-[120%] text-[#2A2A2A]">
+      Phone
+      <sup className="text-lg font-bold text-[#AAB7A2]"> *</sup>
+      <div className="mt-2 flex h-12 overflow-hidden rounded-lg bg-[#EAEAEA] focus-within:ring-2 focus-within:ring-[#5E6755]/25">
+        <select
+          aria-label="Phone country code"
+          value={phoneCountry}
+          onChange={event => {
+            setPhoneCountry(event.target.value as CountryCode)
+            setPhoneError('')
+          }}
+          className="w-[145px] shrink-0 border-0 border-r border-[#D2D2D2] bg-transparent px-3 text-sm font-semibold text-[#303030] outline-none"
+        >
+          {phoneCountries.map(country => (
+            <option key={country.code} value={country.code}>
+              +{country.callingCode} · {country.name}
+            </option>
+          ))}
+        </select>
+        <input
+          name="phone"
+          required
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel-national"
+          value={phoneValue}
+          onChange={event => {
+            setPhoneValue(event.target.value)
+            setPhoneError('')
+          }}
+          placeholder={phoneCountry === 'US' ? '(201) 555-0123' : 'Phone number'}
+          aria-invalid={Boolean(phoneError)}
+          aria-describedby="signup-phone-help signup-phone-error"
+          className="min-w-0 flex-1 border-0 bg-transparent px-4 text-base font-medium lining-nums tabular-nums text-[#131313] outline-none placeholder:text-[#787878]"
+        />
+      </div>
+      <span
+        id="signup-phone-help"
+        className="mt-1.5 block text-xs font-normal leading-5 text-[#686868]"
+      >
+        {phoneCountry === 'US'
+          ? 'Example: (201) 555-0123. Country code +1 will be added automatically.'
+          : `Country code +${selectedCallingCode} will be added automatically.`}
+      </span>
+      {phoneError && (
+        <span
+          id="signup-phone-error"
+          role="alert"
+          className="mt-1 block text-sm font-medium text-red-700"
+        >
+          {phoneError}
+        </span>
+      )}
+    </label>
+  )
   const field = (
     name: string,
     label: string,
@@ -222,8 +315,7 @@ function AuthPageContent({ mode }: { mode: Mode }) {
                 )}
               {(mode === 'login' || mode === 'signup' || mode === 'forgot') &&
                 field('email', 'Email', 'email', 'Enter your email address...')}
-              {mode === 'signup' &&
-                field('phone', 'Phone', 'tel', 'Enter your phone number...')}
+              {mode === 'signup' && phoneField}
               {mode === 'otp' &&
                 field(
                   'otp',
