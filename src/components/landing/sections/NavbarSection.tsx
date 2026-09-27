@@ -49,7 +49,7 @@ export function NavbarSection({ activePage = "home", accountMode = false }: Navb
 
   return (
     <header className="navbar">
-      <div className="navbar-container mx-auto">
+      <div className="site-container navbar-container">
         <Link href="/" className="logo-panel" aria-label="Velari™ home"><Image src="/images/logo.png" alt="Velari™" width={180} height={59} className="logo" priority /></Link>
         <nav className={menuOpen ? "nav-links open" : "nav-links"} aria-label="Main navigation">
           <Link href="/" className={activePage === "home" ? "active" : ""} onClick={closeMenu}>Home</Link><Link href="/how-it-works" className={activePage === "how-it-works" ? "active" : ""} onClick={closeMenu}>How It Works</Link>

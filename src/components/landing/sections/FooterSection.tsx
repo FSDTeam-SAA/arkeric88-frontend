@@ -16,9 +16,7 @@ export function FooterSection() {
             />
           </Link>
           <p>
-            Discover the destinations your soul truly needs. Velari™ combines
-            emotional intelligence, zodiac insights, and cutting-edge AI to
-            craft personalized luxury travel experiences designed around you.
+            Velari™ helps you explore travel through how you want to feel. Your answers shape destination ideas, stays, experiences, and itinerary suggestions that fit your preferences.
           </p>
         </div>
         <div>
