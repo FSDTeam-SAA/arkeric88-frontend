@@ -16,6 +16,7 @@ export type SampleJourney = {
   seeker: string;
   travelStyle: string;
   themes: string[];
+  stayArea: string;
   stay: { name: string; rating: number };
   days: { day: number; title: string; activities: SampleActivity[] }[];
   packingTips: string;
@@ -29,9 +30,10 @@ export const sampleJourneys: Record<string, SampleJourney> = {
     city: "Kyoto",
     country: "Japan",
     heroImage: "/images/place-1.jpg",
-    seeker: "Calm Seeker",
-    travelStyle: "Mindful slow travel",
-    themes: ["Quiet Temples", "Mindful Rituals", "Slow Luxury"],
+    seeker: "Reflection",
+    travelStyle: "Reflective cultural journey",
+    stayArea: "central Kyoto",
+    themes: ["Culture", "Gardens", "Quiet Time"],
     stay: { name: "Kyoto Riverside Ryokan", rating: 4.8 },
     days: [
       {
@@ -71,9 +73,10 @@ export const sampleJourneys: Record<string, SampleJourney> = {
     city: "Santorini",
     country: "Greece",
     heroImage: "/images/place-2.jpg",
-    seeker: "Connection Seeker",
-    travelStyle: "Romantic coastal escape",
-    themes: ["Coastal Calm", "Ancient Culture", "Sunset Rituals"],
+    seeker: "Connection",
+    travelStyle: "Connected coastal exploration",
+    stayArea: "Oia or Imerovigli",
+    themes: ["Shared Meals", "Coast", "Exploration"],
     stay: { name: "Caldera View Cave Suites", rating: 4.7 },
     days: [
       {
@@ -110,54 +113,56 @@ export const sampleJourneys: Record<string, SampleJourney> = {
   },
   mexico: {
     slug: "mexico",
-    city: "Tulum",
+    city: "Mexico City",
     country: "Mexico",
     heroImage: "/images/place-3.jpg",
-    seeker: "Restoration Seeker",
-    travelStyle: "Nature-led wellness",
-    themes: ["Wellness Reset", "Sacred Nature", "Barefoot Luxury"],
-    stay: { name: "Tulum Jungle Retreat", rating: 4.6 },
+    seeker: "Inspiration",
+    travelStyle: "Creative city discovery",
+    stayArea: "Roma Norte or Condesa",
+    themes: ["Art", "Food", "Creative Streets"],
+    stay: { name: "Roma Norte Design Hotel", rating: 4.7 },
     days: [
       {
         day: 1,
-        title: "Land softly with coastal history and restorative rituals.",
+        title: "Meet the city through murals, architecture, and neighborhood flavors.",
         activities: [
-          { name: "Tulum Ruins at Opening", description: "Explore the cliffside Maya site in the cooler morning air before taking in the Caribbean views.", location: "Tulum Archaeological Zone", address: "Carretera Federal, Tulum, Quintana Roo", time: "08:00 AM – 10:00 AM", estimatedCost: 15 },
-          { name: "Beachside Seasonal Lunch", description: "Refuel with local produce, fresh seafood, and cooling aguas frescas beside the sea.", location: "Tulum Beach", address: "Zona Costera, Tulum, Quintana Roo", time: "12:00 PM – 01:30 PM", estimatedCost: 38, distanceFromPreviousKm: 4.2 },
-          { name: "Sunset Breathwork Session", description: "Release travel tension with guided breathing and gentle movement as the temperature drops.", location: "South Tulum Beach", address: "Zona Hotelera, Tulum, Quintana Roo", time: "05:30 PM – 06:45 PM", estimatedCost: 45, distanceFromPreviousKm: 5.8 },
+          { name: "Historic Center Art Walk", description: "Walk from grand civic spaces to landmark murals while a local guide connects art with the city's layered history.", location: "Centro Histórico", address: "Plaza de la Constitución, Centro, Mexico City", time: "09:00 AM – 11:30 AM", estimatedCost: 28 },
+          { name: "Market-to-Table Lunch", description: "Taste seasonal dishes inspired by market produce, regional recipes, and contemporary Mexican cooking.", location: "Centro Histórico", address: "República de Uruguay, Centro, Mexico City", time: "12:30 PM – 02:00 PM", estimatedCost: 42, distanceFromPreviousKm: 1.2 },
+          { name: "Roma Norte Creative Streets", description: "Browse independent studios, bookstores, galleries, and tree-lined streets at an unhurried pace.", location: "Roma Norte", address: "Avenida Álvaro Obregón, Roma Norte, Mexico City", time: "04:00 PM – 06:30 PM", estimatedCost: 0, distanceFromPreviousKm: 4.8 },
         ],
       },
       {
         day: 2,
-        title: "Cool water, jungle stillness, and a slower nervous system.",
+        title: "Follow bold ideas from modern masters to living neighborhood culture.",
         activities: [
-          { name: "Early Cenote Swim", description: "Float in clear freshwater surrounded by limestone and jungle while the cenote is still quiet.", location: "Cenote near Tulum", address: "Tulum Municipality, Quintana Roo", time: "08:30 AM – 10:30 AM", estimatedCost: 32 },
-          { name: "Jungle Table Lunch", description: "Enjoy a produce-forward lunch inspired by Yucatán flavors in a shaded garden setting.", location: "Tulum Pueblo", address: "Centro, Tulum, Quintana Roo", time: "12:30 PM – 02:00 PM", estimatedCost: 34, distanceFromPreviousKm: 11.5 },
-          { name: "Sound Healing at Dusk", description: "Settle into a guided sound bath designed to create space for rest and emotional integration.", location: "Aldea Zama", address: "Aldea Zama, Tulum, Quintana Roo", time: "06:00 PM – 07:30 PM", estimatedCost: 60, distanceFromPreviousKm: 3.1 },
+          { name: "Frida Kahlo Museum", description: "Explore the artist's home, personal objects, and vivid body of work with time to reflect in the garden.", location: "Museo Frida Kahlo", address: "Londres 247, Del Carmen, Coyoacán, Mexico City", time: "09:00 AM – 11:00 AM", estimatedCost: 32 },
+          { name: "Coyoacán Market Tasting", description: "Try tostadas, fruit, and traditional sweets while learning how neighborhood food traditions continue to evolve.", location: "Mercado de Coyoacán", address: "Ignacio Allende, Coyoacán, Mexico City", time: "11:30 AM – 01:00 PM", estimatedCost: 24, distanceFromPreviousKm: 0.7 },
+          { name: "UNAM Mosaic and Sculpture Route", description: "See monumental mosaics and open-air sculpture where modern design, public space, and volcanic landscape meet.", location: "Ciudad Universitaria", address: "Coyoacán, Mexico City", time: "03:00 PM – 06:00 PM", estimatedCost: 18, distanceFromPreviousKm: 5.6 },
         ],
       },
       {
         day: 3,
-        title: "Reconnect with wild landscapes before an easy final evening.",
+        title: "Find fresh inspiration in design, local kitchens, and evening street life.",
         activities: [
-          { name: "Sian Ka'an Nature Excursion", description: "Take a small-boat journey through lagoons and mangroves with time for wildlife observation and a quiet swim.", location: "Sian Ka'an Biosphere Reserve", address: "Felipe Carrillo Puerto, Quintana Roo", time: "08:00 AM – 01:00 PM", estimatedCost: 125 },
-          { name: "Restorative Spa Ritual", description: "Return for a cooling botanical treatment and an hour deliberately left without plans.", location: "Tulum Beach Road", address: "Zona Hotelera, Tulum, Quintana Roo", time: "03:30 PM – 05:00 PM", estimatedCost: 110, distanceFromPreviousKm: 34.0 },
-          { name: "Garden Farewell Dinner", description: "Finish with a candlelit dinner centered on regional ingredients and wood-fired cooking.", location: "La Veleta", address: "La Veleta, Tulum, Quintana Roo", time: "07:30 PM – 09:00 PM", estimatedCost: 68, distanceFromPreviousKm: 7.2 },
+          { name: "Contemporary Art Morning", description: "Visit a focused contemporary collection and leave room to discuss the ideas that stay with you.", location: "Museo Jumex", address: "Miguel de Cervantes Saavedra 303, Granada, Mexico City", time: "10:00 AM – 12:00 PM", estimatedCost: 12 },
+          { name: "Condesa Design and Coffee Walk", description: "Move between small design shops, shaded parks, and an independent café in one of the city's most walkable areas.", location: "Condesa", address: "Avenida Amsterdam, Hipódromo, Mexico City", time: "02:00 PM – 05:00 PM", estimatedCost: 30, distanceFromPreviousKm: 6.9 },
+          { name: "Evening Street Food Tour", description: "Close the journey with tacos, antojitos, and stories from cooks shaping the city's late-night food culture.", location: "Roma and Juárez", address: "Colonia Roma Norte, Mexico City", time: "07:00 PM – 09:30 PM", estimatedCost: 58, distanceFromPreviousKm: 2.4 },
         ],
       },
     ],
-    packingTips: "Choose breathable clothing, reef-conscious sun protection, insect repellent, water shoes, and a refillable bottle. Bring a light layer for air-conditioned transfers.",
-    travelTips: "Plan outdoor activities early, use reputable pre-arranged transport, and protect open time for rest. Humidity and traffic make a slower schedule feel better.",
-    estimatedTotal: 527,
+    packingTips: "Bring comfortable walking shoes, light layers, a compact rain jacket, sun protection, and a secure day bag for markets, museums, and busy streets.",
+    travelTips: "Reserve popular museums in advance, use arranged transport after dark, and group each day by neighborhood. Leave space for galleries, cafés, and discoveries between planned stops.",
+    estimatedTotal: 244,
   },
   egypt: {
     slug: "egypt",
     city: "Luxor",
     country: "Egypt",
     heroImage: "/images/place-4.jpg",
-    seeker: "Curiosity Seeker",
-    travelStyle: "Immersive cultural discovery",
-    themes: ["Ancient Wonder", "Living History", "Nile Stillness"],
+    seeker: "Discovery",
+    travelStyle: "Story-led cultural discovery",
+    stayArea: "Luxor's East Bank",
+    themes: ["History", "Local Stories", "New Perspectives"],
     stay: { name: "Nile Garden Heritage Hotel", rating: 4.7 },
     days: [
       {

@@ -1,12 +1,43 @@
-import { Brain, ClipboardList, Heart, MapPin } from "lucide-react";
-
 const steps = [
-  { icon: Heart, title: "Share Your Emotions", text: "Answer a brief emotional assessment about how you feel right now.", color: "red" },
-  { icon: Brain, title: "Personality Analysis", text: "Your emotional and astrological personality.", color: "blue" },
-  { icon: MapPin, title: "Discover Matched Destinations", text: "Receive destinations aligned to your inner state.", color: "orange" },
-  { icon: ClipboardList, title: "Receive Your Itinerary", text: "Get a day-by-day travel plan delivered instantly.", color: "green" },
+  {
+    number: "01",
+    title: "Share how you feel",
+    text: "Choose how you feel now and what you want from the trip.",
+  },
+  {
+    number: "02",
+    title: "Tell us what matters",
+    text: "Add interests, pace, setting, travel dates, and budget.",
+  },
+  {
+    number: "03",
+    title: "Explore your matches",
+    text: "See destinations with a clear reason for each recommendation.",
+  },
+  {
+    number: "04",
+    title: "Shape your itinerary",
+    text: "Review suggested days and adjust what does or does not fit.",
+  },
 ];
 
 export function ProcessSection() {
-  return <section className="process" id="how-it-works"><div className="section-heading"><h2>From Emotion to Extraordinary Journey</h2><p>A Simple 4-Step Process Designed Around Your Emotional Truth</p></div><div className="steps">{steps.map(({ icon: Icon, title, text, color }) => <article className="step-card" key={title}><span className={`step-icon ${color}`}><Icon size={22} /></span><h3>{title}</h3><p>{text}</p></article>)}</div></section>;
+  return (
+    <section className="process" id="how-it-works">
+      <div className="section-heading">
+        <h2>How Velari shapes your journey</h2>
+      </div>
+      <div className="steps">
+        {steps.map(({ number, title, text }) => (
+          <article className="step-card" key={number}>
+            <span className="step-number" aria-hidden="true">{number}</span>
+            <div>
+              <h3>{title}</h3>
+              <p>{text}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
 }
