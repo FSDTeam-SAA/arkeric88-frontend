@@ -27,7 +27,15 @@ import {
   User,
   Users,
 } from "lucide-react";
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  FormEvent,
+  KeyboardEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -53,6 +61,13 @@ import {
 } from "@/lib/wellness-archetypes";
 
 type Answer = string | string[];
+type LocationSuggestion = {
+  id: string;
+  label: string;
+  mainText: string;
+  secondaryText: string;
+};
+
 const optionIcons = [Sparkles, Compass, Star, User, MapPin, Home];
 const draftKey = "velari-journey-draft";
 const draftVersion = 5;
@@ -274,6 +289,15 @@ export function JourneyQuiz() {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [paymentError, setPaymentError] = useState("");
   const [intent, setIntent] = useState<PaymentIntentData | null>(null);
+  const [locationSuggestions, setLocationSuggestions] = useState<
+    LocationSuggestion[]
+  >([]);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationError, setLocationError] = useState("");
+  const [locationOpen, setLocationOpen] = useState(false);
+  const [locationSearchEnabled, setLocationSearchEnabled] = useState(false);
+  const [activeLocationIndex, setActiveLocationIndex] = useState(-1);
+  const locationFieldRef = useRef<HTMLDivElement>(null);
   const [stripePromise, setStripePromise] =
     useState<Promise<Stripe | null> | null>(null);
   const questions = useMemo(() => getQuizQuestions(), []);
@@ -307,6 +331,72 @@ export function JourneyQuiz() {
       router.replace("/login?callbackUrl=%2Fjourney");
     }
   }, [router, status]);
+
+  useEffect(() => {
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!locationFieldRef.current?.contains(event.target as Node)) {
+        setLocationOpen(false);
+        setActiveLocationIndex(-1);
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, []);
+
+  useEffect(() => {
+    if (!locationSearchEnabled) return;
+
+    const query = String(answers.departure_location || "").trim();
+    if (query.length < 2) {
+      setLocationSuggestions([]);
+      setLocationError("");
+      setLocationLoading(false);
+      setLocationOpen(false);
+      setActiveLocationIndex(-1);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeout = window.setTimeout(async () => {
+      setLocationLoading(true);
+      setLocationError("");
+      setLocationOpen(true);
+
+      try {
+        const response = await fetch(
+          `/api/location-autocomplete?q=${encodeURIComponent(query)}`,
+          { signal: controller.signal },
+        );
+        const result = (await response.json().catch(() => null)) as {
+          suggestions?: LocationSuggestion[];
+          error?: string;
+        } | null;
+
+        if (!response.ok) {
+          throw new Error(result?.error || "Unable to load locations.");
+        }
+
+        setLocationSuggestions(result?.suggestions || []);
+        setActiveLocationIndex(-1);
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        setLocationSuggestions([]);
+        setLocationError(
+          error instanceof Error
+            ? error.message
+            : "Unable to load locations. Please try again.",
+        );
+      } finally {
+        if (!controller.signal.aborted) setLocationLoading(false);
+      }
+    }, 350);
+
+    return () => {
+      window.clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [answers.departure_location, locationSearchEnabled]);
 
   const saveDraft = useCallback(() => {
     localStorage.setItem(
@@ -382,6 +472,40 @@ export function JourneyQuiz() {
   const setTextAnswer = (key: string, value: string) => {
     setValidationError("");
     setAnswers((current) => ({ ...current, [key]: value }));
+  };
+
+  const selectLocation = (suggestion: LocationSuggestion) => {
+    setTextAnswer("departure_location", suggestion.label);
+    setLocationSearchEnabled(false);
+    setLocationSuggestions([]);
+    setLocationError("");
+    setLocationOpen(false);
+    setActiveLocationIndex(-1);
+  };
+
+  const handleLocationKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Escape") {
+      setLocationOpen(false);
+      setActiveLocationIndex(-1);
+      return;
+    }
+
+    if (!locationOpen || !locationSuggestions.length) return;
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setActiveLocationIndex((current) =>
+        current >= locationSuggestions.length - 1 ? 0 : current + 1,
+      );
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setActiveLocationIndex((current) =>
+        current <= 0 ? locationSuggestions.length - 1 : current - 1,
+      );
+    } else if (event.key === "Enter" && activeLocationIndex >= 0) {
+      event.preventDefault();
+      selectLocation(locationSuggestions[activeLocationIndex]);
+    }
   };
 
   const isSelected = (value: string, answerKey = q.key) => {
@@ -993,17 +1117,96 @@ export function JourneyQuiz() {
 
           {q.kind === "departure" && (
             <>
-              <div className="departure-field">
+              <div className="departure-field" ref={locationFieldRef}>
                 <Input
                   className="quiz-text-input"
                   aria-label="Departure city or airport"
-                  value={String(answers.departure_location || "")}
-                  onChange={(event) =>
-                    setTextAnswer("departure_location", event.target.value)
+                  role="combobox"
+                  aria-autocomplete="list"
+                  aria-expanded={locationOpen}
+                  aria-controls="departure-location-suggestions"
+                  aria-activedescendant={
+                    activeLocationIndex >= 0
+                      ? `departure-location-${activeLocationIndex}`
+                      : undefined
                   }
+                  value={String(answers.departure_location || "")}
+                  onChange={(event) => {
+                    setLocationSearchEnabled(true);
+                    setLocationSuggestions([]);
+                    setLocationError("");
+                    setActiveLocationIndex(-1);
+                    setTextAnswer("departure_location", event.target.value);
+                  }}
+                  onFocus={() => {
+                    if (
+                      locationSearchEnabled &&
+                      String(answers.departure_location || "").trim().length >=
+                        2
+                    ) {
+                      setLocationOpen(true);
+                    }
+                  }}
+                  onKeyDown={handleLocationKeyDown}
                   placeholder="Search your city or departure airport"
                   autoComplete="off"
                 />
+                {locationLoading && (
+                  <Loader2
+                    className="location-loading spin"
+                    size={18}
+                    aria-label="Loading location suggestions"
+                  />
+                )}
+                {locationOpen && (
+                  <div
+                    className="location-suggestions"
+                    id="departure-location-suggestions"
+                    role="listbox"
+                    aria-label="Location suggestions"
+                  >
+                    {locationLoading && !locationSuggestions.length ? (
+                      <div className="location-message" role="status">
+                        Searching locations…
+                      </div>
+                    ) : locationError ? (
+                      <div className="location-message error" role="alert">
+                        {locationError}
+                      </div>
+                    ) : locationSuggestions.length ? (
+                      locationSuggestions.map((suggestion, index) => (
+                        <button
+                          type="button"
+                          id={`departure-location-${index}`}
+                          key={suggestion.id}
+                          className={
+                            index === activeLocationIndex ? "active" : ""
+                          }
+                          role="option"
+                          aria-selected={index === activeLocationIndex}
+                          onMouseDown={(event) => event.preventDefault()}
+                          onMouseEnter={() => setActiveLocationIndex(index)}
+                          onClick={() => selectLocation(suggestion)}
+                        >
+                          <MapPin size={16} aria-hidden="true" />
+                          <span>
+                            <strong>{suggestion.mainText}</strong>
+                            {suggestion.secondaryText && (
+                              <small>{suggestion.secondaryText}</small>
+                            )}
+                          </span>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="location-message" role="status">
+                        No matching locations found.
+                      </div>
+                    )}
+                    <div className="location-attribution">
+                      Powered by Google
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="quiz-options departure-options">
                 {q.options?.map((option) => (
