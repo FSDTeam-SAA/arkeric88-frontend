@@ -1621,16 +1621,42 @@ footer {
 .departure-field input {
   width: 100%;
   height: 64px;
-  padding: 0 52px 0 24px;
+  padding: 0 82px 0 24px;
   font-size: 17px;
 }
 .location-loading {
   position: absolute;
   top: 23px;
-  right: 22px;
+  right: 54px;
   z-index: 2;
   color: var(--olive);
   pointer-events: none;
+}
+.location-clear {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  z-index: 3;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #77786f;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+}
+.location-clear:hover,
+.location-clear:focus-visible {
+  background: rgba(94, 103, 85, 0.1);
+  color: var(--olive);
+  outline: none;
 }
 .location-suggestions {
   position: absolute;
@@ -3786,12 +3812,17 @@ footer {
   }
   .departure-field input {
     height: 54px;
-    padding-right: 46px;
+    padding-right: 76px;
     font-size: 14px;
   }
   .location-loading {
     top: 18px;
-    right: 17px;
+    right: 48px;
+  }
+  .location-clear {
+    right: 9px;
+    width: 34px;
+    height: 34px;
   }
   .location-suggestions {
     max-height: min(330px, 48vh);

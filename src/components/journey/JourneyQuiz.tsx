@@ -26,6 +26,7 @@ import {
   Star,
   User,
   Users,
+  X,
 } from "lucide-react";
 import {
   FormEvent,
@@ -478,6 +479,16 @@ export function JourneyQuiz() {
     setTextAnswer("departure_location", suggestion.label);
     setLocationSearchEnabled(false);
     setLocationSuggestions([]);
+    setLocationError("");
+    setLocationOpen(false);
+    setActiveLocationIndex(-1);
+  };
+
+  const clearLocation = () => {
+    setTextAnswer("departure_location", "");
+    setLocationSearchEnabled(false);
+    setLocationSuggestions([]);
+    setLocationLoading(false);
     setLocationError("");
     setLocationOpen(false);
     setActiveLocationIndex(-1);
@@ -1151,6 +1162,16 @@ export function JourneyQuiz() {
                   placeholder="Search your city or departure airport"
                   autoComplete="off"
                 />
+                {String(answers.departure_location || "") && (
+                  <button
+                    type="button"
+                    className="location-clear"
+                    aria-label="Clear departure location"
+                    onClick={clearLocation}
+                  >
+                    <X size={18} aria-hidden="true" />
+                  </button>
+                )}
                 {locationLoading && (
                   <Loader2
                     className="location-loading spin"
