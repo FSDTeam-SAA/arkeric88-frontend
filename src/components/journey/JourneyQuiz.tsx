@@ -50,14 +50,16 @@ import {
 } from "@/components/ui/select";
 import { countries } from "@/lib/countries";
 import {
+  ApiError,
   journeyApi,
   PaymentIntentData,
-  QuestionnaireAnswers,
+  Restriction,
+  RestrictionSeverity,
+  VelariIntake,
 } from "@/lib/journey-api";
 import {
   getQuizQuestions,
   QuizOption,
-  QuizQuestion,
   travelPeriodOptions,
 } from "@/lib/wellness-archetypes";
 
@@ -71,7 +73,7 @@ type LocationSuggestion = {
 
 const optionIcons = [Sparkles, Compass, Star, User, MapPin, Home];
 const draftKey = "velari-journey-draft";
-const draftVersion = 5;
+const draftVersion = 6;
 
 function answerLabel(question: { options?: QuizOption[] }, value: string) {
   return (
@@ -145,11 +147,14 @@ function PaymentForm({
       setProcessing(false);
       return;
     }
-    if (paymentIntent) {
+    if (paymentIntent?.status === "succeeded") {
       sessionStorage.setItem("velari-last-payment", intent.paymentIntentId);
       router.push(
-        `/results?payment_intent=${encodeURIComponent(paymentIntent.id)}`,
+        `/results?payment_intent=${encodeURIComponent(intent.paymentIntentId)}`,
       );
+    } else {
+      setError("Your payment is still processing. Please wait a moment and try again.");
+      setProcessing(false);
     }
   };
 
@@ -289,6 +294,7 @@ export function JourneyQuiz() {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [paymentError, setPaymentError] = useState("");
+  const [paymentErrorSources, setPaymentErrorSources] = useState<string[]>([]);
   const [intent, setIntent] = useState<PaymentIntentData | null>(null);
   const [locationSuggestions, setLocationSuggestions] = useState<
     LocationSuggestion[]
@@ -461,12 +467,17 @@ export function JourneyQuiz() {
         setValidationError(`You can select up to ${maxSelections} options.`);
         return current;
       }
-      return {
+      const nextValues = withoutExclusive.includes(value)
+        ? withoutExclusive.filter((item) => item !== value)
+        : [...withoutExclusive, value];
+      const next = {
         ...current,
-        [answerKey]: withoutExclusive.includes(value)
-          ? withoutExclusive.filter((item) => item !== value)
-          : [...withoutExclusive, value],
+        [answerKey]: nextValues,
       };
+      if (answerKey === "activity_restrictions" && !nextValues.includes(value)) {
+        delete next[`restriction_severity_${value}`];
+      }
+      return next;
     });
   };
 
@@ -592,6 +603,17 @@ export function JourneyQuiz() {
         );
         return false;
       }
+      if (rooms > adults + children) {
+        setValidationError("Room count cannot exceed the total number of travelers.");
+        return false;
+      }
+      const childAges = Array.from({ length: children }, (_, index) =>
+        Number(answers[`party_child_age_${index}`]),
+      );
+      if (children > 0 && childAges.some((age) => !Number.isInteger(age) || age < 0 || age > 17)) {
+        setValidationError("Enter an age from 0 to 17 for every child.");
+        return false;
+      }
       return true;
     }
 
@@ -623,6 +645,20 @@ export function JourneyQuiz() {
         }
         if (new Date(checkOut) <= new Date(checkIn)) {
           setValidationError("Check-out must be after check-in.");
+          return false;
+        }
+        const today = new Date().toISOString().slice(0, 10);
+        if (checkIn < today) {
+          setValidationError("Check-in cannot be in the past.");
+          return false;
+        }
+        const expectedNights = Math.round(
+          (new Date(`${checkOut}T00:00:00`).getTime() -
+            new Date(`${checkIn}T00:00:00`).getTime()) /
+            86400000,
+        );
+        if (nights !== expectedNights) {
+          setValidationError("Number of nights must match the selected dates.");
           return false;
         }
       }
@@ -659,164 +695,56 @@ export function JourneyQuiz() {
     return true;
   };
 
-  const questionFor = useCallback(
-    (key: string) => questions.find((question) => question.key === key),
-    [questions],
-  );
-  const labelsFor = useCallback(
-    (key: string) => {
-      const question = questionFor(key);
-      return selectedValues(key).map((value) =>
-        answerLabel(question || {}, value),
-      );
-    },
-    [questionFor, selectedValues],
-  );
-
-  const questionnaire = useMemo<QuestionnaireAnswers>(() => {
-    const feelingLabels = labelsFor("recent_feelings").map((label) =>
-      label === "Something else"
-        ? String(answers.recent_feelings_other || "").trim()
-        : label,
-    );
-    const goalLabels = labelsFor("trip_goals");
-    const momentLabels = labelsFor("preferred_moments");
-    const environmentLabels = labelsFor("preferred_environments");
-    const promptQuestion = questionFor("trip_prompt");
-    const promptLabel =
-      answers.trip_prompt === "something_else"
-        ? String(answers.trip_prompt_other || "").trim()
-        : answerLabel(promptQuestion || {}, String(answers.trip_prompt || ""));
-    const paceLabel = answerLabel(
-      questionFor("trip_pace") || {},
-      String(answers.trip_pace || ""),
-    );
-    const partyLabel = answerLabel(
-      questionFor("travel_party") || {},
-      String(answers.travel_party || ""),
-    );
-    const distanceLabel = answerLabel(
-      questionFor("departure") || {},
-      String(answers.travel_distance || ""),
-    );
-    const timingLabel = answerLabel(
-      questionFor("travel_timing") || {},
-      String(answers.travel_timing || ""),
-    );
-    const restrictionQuestion = questionFor("activity_restrictions");
-    const restrictions = selectedValues("activity_restrictions").map(
-      (value) => {
-        const label =
-          value === "other"
-            ? String(answers.restriction_notes || "").trim()
-            : answerLabel(restrictionQuestion || {}, value);
-        const severity =
-          answers[`restriction_severity_${value}`] === "must_avoid"
-            ? "must avoid"
-            : "prefer to avoid";
-        return `${label} (${severity})`;
-      },
-    );
-    const notes = String(answers.restriction_notes || "").trim();
-    if (notes && !selectedValues("activity_restrictions").includes("other"))
-      restrictions.push(`Additional note: ${notes}`);
-
-    const isSolo = answers.travel_party === "solo";
-    const adults = isSolo
-      ? 1
-      : Math.max(1, Number(answers.party_adults) || 1);
-    const children = isSolo
-      ? 0
-      : Math.max(0, Number(answers.party_children) || 0);
+  const intake = useMemo<VelariIntake>(() => {
+    const travelParty = String(answers.travel_party) as VelariIntake["travel_party"];
+    const isSolo = travelParty === "solo";
+    const adults = isSolo ? 1 : Math.max(1, Number(answers.party_adults) || 1);
+    const children = isSolo ? 0 : Math.max(0, Number(answers.party_children) || 0);
     const rooms = isSolo ? 1 : Math.max(1, Number(answers.party_rooms) || 1);
-    const nights = Math.max(1, Number(answers.trip_nights) || 1);
+    const restrictions = selectedValues("activity_restrictions") as Restriction[];
+    const restrictionSeverity = restrictions.reduce<Partial<Record<Restriction, RestrictionSeverity>>>(
+      (result, restriction) => {
+        const severity = answers[`restriction_severity_${restriction}`];
+        if (severity === "must_avoid" || severity === "prefer_avoid") result[restriction] = severity;
+        return result;
+      },
+      {},
+    );
+    const recentFeelings = selectedValues("recent_feelings") as VelariIntake["recent_feelings"];
+    const tripPrompt = String(answers.trip_prompt) as VelariIntake["trip_prompt"];
+    const timing = String(answers.travel_timing) as VelariIntake["travel_timing"];
+    const notes = String(answers.restriction_notes || "").trim();
+    const childAges = Array.from({ length: children }, (_, index) => Number(answers[`party_child_age_${index}`]));
 
     return {
-      recent_feelings: feelingLabels,
-      trip_goals: goalLabels,
-      trip_prompt: promptLabel,
-      preferred_moments: momentLabels,
-      preferred_environments: environmentLabels,
-      trip_pace: paceLabel,
-      travel_party: partyLabel,
-      party_details: { adults, children, rooms },
-      activity_restrictions: restrictions,
-      restriction_notes: notes || undefined,
+      recent_feelings: recentFeelings,
+      ...(recentFeelings.includes("something_else") ? { recent_feelings_other: String(answers.recent_feelings_other || "").trim() } : {}),
+      trip_goals: selectedValues("trip_goals") as VelariIntake["trip_goals"],
+      trip_prompt: tripPrompt,
+      ...(tripPrompt === "something_else" ? { trip_prompt_other: String(answers.trip_prompt_other || "").trim() } : {}),
+      preferred_moments: selectedValues("preferred_moments") as VelariIntake["preferred_moments"],
+      preferred_environments: selectedValues("preferred_environments") as VelariIntake["preferred_environments"],
+      trip_pace: String(answers.trip_pace) as VelariIntake["trip_pace"],
+      travel_party: travelParty,
+      party_adults: adults,
+      party_children: children,
+      party_rooms: rooms,
+      ...(children > 0 ? { party_child_ages: childAges } : {}),
+      ...(restrictions.length ? { activity_restrictions: restrictions, restriction_severity: restrictionSeverity } : {}),
+      ...(notes ? { restriction_notes: notes } : {}),
       departure_location: String(answers.departure_location || "").trim(),
-      travel_distance: distanceLabel,
-      travel_timing: timingLabel,
-      check_in_date:
-        answers.travel_timing === "exact_dates"
-          ? String(answers.check_in_date || "")
-          : undefined,
-      check_out_date:
-        answers.travel_timing === "exact_dates"
-          ? String(answers.check_out_date || "")
-          : undefined,
-      travel_period:
-        answers.travel_timing === "month_season"
-          ? answerLabel(
-              { options: travelPeriodOptions },
-              String(answers.travel_period || ""),
-            )
-          : undefined,
-      trip_length_days: nights,
+      travel_distance: String(answers.travel_distance) as VelariIntake["travel_distance"],
+      travel_timing: timing,
+      ...(timing === "exact_dates" ? {
+        check_in_date: String(answers.check_in_date || ""),
+        check_out_date: String(answers.check_out_date || ""),
+      } : {}),
+      ...(timing === "month_season" ? { travel_period: String(answers.travel_period || "") as NonNullable<VelariIntake["travel_period"]> } : {}),
+      trip_nights: Math.max(1, Number(answers.trip_nights) || 1),
       budget_per_night: budget,
       currency: "USD",
-      todays_feeling: feelingLabels.join(", "),
-      experience_kind: goalLabels.join(", "),
-      travel_style: partyLabel,
-      trip_organization: paceLabel,
-      total_trip_budget: budget * rooms * nights,
     };
-  }, [answers, budget, labelsFor, questionFor, selectedValues]);
-
-  const formattedAnswer = useCallback(
-    (question: QuizQuestion) => {
-      if (question.kind === "range")
-        return `${formatApiPrice(budget)} per room, per night`;
-      if (question.kind === "party") {
-        if (answers.travel_party === "solo") {
-          return questionnaire.travel_party;
-        }
-        return `${questionnaire.travel_party}; ${questionnaire.party_details.adults} adults, ${questionnaire.party_details.children} children, ${questionnaire.party_details.rooms} rooms`;
-      }
-      if (question.kind === "restrictions") {
-        return questionnaire.activity_restrictions.length
-          ? questionnaire.activity_restrictions.join("; ")
-          : "No restrictions provided";
-      }
-      if (question.kind === "departure") {
-        return `${questionnaire.departure_location}; ${questionnaire.travel_distance}`;
-      }
-      if (question.kind === "timing") {
-        return [
-          questionnaire.travel_timing,
-          questionnaire.check_in_date && questionnaire.check_out_date
-            ? `${questionnaire.check_in_date} to ${questionnaire.check_out_date}`
-            : "",
-          questionnaire.travel_period || "",
-          `${questionnaire.trip_length_days} nights`,
-        ]
-          .filter(Boolean)
-          .join("; ");
-      }
-      const value = answers[question.key];
-      if (Array.isArray(value)) {
-        return value
-          .map((item) =>
-            item === question.otherOption
-              ? String(answers[`${question.key}_other`] || "").trim()
-              : answerLabel(question, item),
-          )
-          .join(", ");
-      }
-      if (value === question.otherOption)
-        return String(answers[`${question.key}_other`] || "").trim();
-      return answerLabel(question, String(value || ""));
-    },
-    [answers, budget, questionnaire],
-  );
+  }, [answers, budget, selectedValues]);
 
   const initializePayment = useCallback(async () => {
     if (!token) {
@@ -828,48 +756,39 @@ export function JourneyQuiz() {
     }
     setPaymentLoading(true);
     setPaymentError("");
+    setPaymentErrorSources([]);
     setIntent(null);
     try {
       const price = await journeyApi<{ price: number }>("/price");
       const amount = Number(price?.price);
       if (!Number.isFinite(amount) || amount < 0.5)
         throw new Error("The journey price is currently unavailable.");
-      const analysisPayload = { questions_answers: questionnaire };
       const data = await journeyApi<PaymentIntentData>("/payments", token, {
         method: "POST",
         body: JSON.stringify({
           amount,
           currency: "usd",
-          description: "Velari™ personalized emotional journey",
-          nameOnCard: session?.user?.name,
-          email: session?.user?.email,
-          quiz: questions.map((question) => ({
-            question: question.title.replaceAll("\n", " "),
-            answer: formattedAnswer(question),
-          })),
-          hope_of_this_trip: questionnaire.experience_kind,
-          ...analysisPayload,
+          intake,
         }),
       });
-      sessionStorage.setItem(
-        `velari-analysis-${data.paymentIntentId}`,
-        JSON.stringify(analysisPayload),
-      );
       setIntent(data);
       setStripePromise(loadStripe(data.publishableKey));
     } catch (error) {
-      setPaymentError(
-        error instanceof Error ? error.message : "Unable to prepare payment.",
-      );
+      if (error instanceof ApiError) {
+        setPaymentError(error.message);
+        setPaymentErrorSources(
+          error.errorSources.map((source) =>
+            `${String(source.path).replace(/^intake\./, "")}: ${source.message}`,
+          ),
+        );
+      } else {
+        setPaymentError(error instanceof Error ? error.message : "Unable to prepare payment.");
+      }
     } finally {
       setPaymentLoading(false);
     }
   }, [
-    formattedAnswer,
-    questionnaire,
-    questions,
-    session?.user?.email,
-    session?.user?.name,
+    intake,
     token,
   ]);
 
@@ -1014,9 +933,10 @@ export function JourneyQuiz() {
                   <div className="party-counts">
                     <label>
                       Adults
-                      <Input
-                        type="number"
-                        min="1"
+                        <Input
+                          type="number"
+                          min="1"
+                          max="30"
                         inputMode="numeric"
                         value={String(answers.party_adults || 1)}
                         onChange={(event) =>
@@ -1026,9 +946,10 @@ export function JourneyQuiz() {
                     </label>
                     <label>
                       Children
-                      <Input
-                        type="number"
-                        min="0"
+                        <Input
+                          type="number"
+                          min="0"
+                          max="20"
                         inputMode="numeric"
                         value={String(answers.party_children || 0)}
                         onChange={(event) =>
@@ -1038,9 +959,10 @@ export function JourneyQuiz() {
                     </label>
                     <label>
                       Rooms
-                      <Input
-                        type="number"
-                        min="1"
+                        <Input
+                          type="number"
+                          min="1"
+                          max="20"
                         inputMode="numeric"
                         value={String(answers.party_rooms || 1)}
                         onChange={(event) =>
@@ -1049,6 +971,24 @@ export function JourneyQuiz() {
                       />
                     </label>
                   </div>
+                  {Number(answers.party_children) > 0 && (
+                    <div className="party-child-ages">
+                      <strong>Children&apos;s ages</strong>
+                      {Array.from({ length: Number(answers.party_children) }, (_, index) => (
+                        <label key={index}>
+                          Child {index + 1}
+                          <Input
+                            type="number"
+                            min="0"
+                            max="17"
+                            inputMode="numeric"
+                            value={String(answers[`party_child_age_${index}`] || "")}
+                            onChange={(event) => setTextAnswer(`party_child_age_${index}`, event.target.value)}
+                          />
+                        </label>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </>
@@ -1274,6 +1214,7 @@ export function JourneyQuiz() {
                         Check-in
                         <Input
                           type="date"
+                          min={new Date().toISOString().slice(0, 10)}
                           value={String(answers.check_in_date || "")}
                           onChange={(event) =>
                             updateDate("check_in_date", event.target.value)
@@ -1409,6 +1350,11 @@ export function JourneyQuiz() {
               <AlertCircle size={34} />
               <h2>Payment couldn&apos;t load</h2>
               <p>{paymentError}</p>
+              {paymentErrorSources.length > 0 && (
+                <ul className="payment-error-sources">
+                  {paymentErrorSources.map((source) => <li key={source}>{source}</li>)}
+                </ul>
+              )}
               <button
                 className="payment-submit"
                 type="button"
