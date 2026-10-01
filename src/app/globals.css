@@ -1567,6 +1567,14 @@ footer {
   width: 100%;
   height: 40px;
 }
+.party-child-ages {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px;
+}
+.party-child-ages > strong { grid-column: 1 / -1; font-size: 12px; }
+.party-child-ages input { width: 100%; height: 40px; }
 .restriction-details {
   width: min(680px, 100%);
   margin: 18px auto 0;
@@ -2223,6 +2231,14 @@ footer {
   color: #706e68;
   font-size: 14px;
 }
+.payment-error-sources {
+  margin: -12px auto 20px;
+  max-width: 390px;
+  padding-left: 20px;
+  color: #8d342e;
+  text-align: left;
+  font-size: 12px;
+}
 .payment-skeleton span,
 .result-skeleton-card span,
 .result-skeleton-card i,
@@ -2331,6 +2347,56 @@ footer {
   color: #696661;
   line-height: 1.5;
 }
+.regeneration-controls,
+.itinerary-regeneration {
+  max-width: 860px;
+  margin: 24px auto 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+.regeneration-controls input,
+.regeneration-controls select,
+.itinerary-regeneration input {
+  min-height: 38px;
+  padding: 8px 11px;
+  border: 1px solid #cfc5b9;
+  border-radius: 7px;
+  background: #fffdf9;
+  color: #4e514a;
+  font: inherit;
+  font-size: 12px;
+}
+.regeneration-controls input:first-child,
+.itinerary-regeneration input { min-width: min(100%, 300px); flex: 1 1 260px; }
+.regeneration-controls input[type="number"] { width: 155px; }
+.regeneration-controls .match-link,
+.itinerary-regeneration .match-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #7c8672;
+  border-radius: 999px;
+  padding: 8px 13px;
+  color: #4e5947;
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.itinerary-detail-card {
+  margin: 0 0 18px;
+  padding: 18px;
+  border: 1px solid #d7cdc1;
+  border-radius: 8px;
+  background: #f0ebe4;
+}
+.itinerary-detail-card small { color: #62705a; font-size: 11px; letter-spacing: .06em; }
+.itinerary-detail-card h2,
+.itinerary-detail-card h3 { margin: 8px 0; font-weight: 500; }
+.itinerary-detail-card p { margin: 7px 0; color: #5e5c57; line-height: 1.55; }
+.activity-verification { margin: 10px 0 0; color: #697262; font-size: 11px; }
 .match-grid {
   max-width: 1180px;
   margin: 52px auto 0;
