@@ -89,6 +89,16 @@ function formatApiPrice(amount: number) {
   }).format(amount);
 }
 
+function getNightsBetween(checkIn: string, checkOut: string) {
+  if (!checkIn || !checkOut) return null;
+
+  return Math.round(
+    (new Date(`${checkOut}T00:00:00`).getTime() -
+      new Date(`${checkIn}T00:00:00`).getTime()) /
+      86400000,
+  );
+}
+
 function PaymentForm({
   intent,
   name,
@@ -544,13 +554,17 @@ export function JourneyQuiz() {
       const next = { ...current, [key]: value };
       const checkIn = String(next.check_in_date || "");
       const checkOut = String(next.check_out_date || "");
-      if (checkIn && checkOut) {
-        const nights = Math.round(
-          (new Date(`${checkOut}T00:00:00`).getTime() -
-            new Date(`${checkIn}T00:00:00`).getTime()) /
-            86400000,
-        );
-        if (nights > 0) next.trip_nights = String(nights);
+      const nights = getNightsBetween(checkIn, checkOut);
+
+      if (nights && nights > 0) {
+        if (next.travel_timing === "exact_dates") {
+          next.trip_nights = String(nights);
+        } else if (next.travel_timing === "flexible") {
+          const selectedNights = Number(next.trip_nights);
+          next.trip_nights = String(
+            Math.min(Math.max(1, selectedNights || 1), nights),
+          );
+        }
       }
       return next;
     });
@@ -636,7 +650,10 @@ export function JourneyQuiz() {
         setValidationError("Choose the timing you know today.");
         return false;
       }
-      if (answers.travel_timing === "exact_dates") {
+      const usesDateRange =
+        answers.travel_timing === "exact_dates" ||
+        answers.travel_timing === "flexible";
+      if (usesDateRange) {
         const checkIn = String(answers.check_in_date || "");
         const checkOut = String(answers.check_out_date || "");
         if (!checkIn || !checkOut) {
@@ -652,13 +669,19 @@ export function JourneyQuiz() {
           setValidationError("Check-in cannot be in the past.");
           return false;
         }
-        const expectedNights = Math.round(
-          (new Date(`${checkOut}T00:00:00`).getTime() -
-            new Date(`${checkIn}T00:00:00`).getTime()) /
-            86400000,
-        );
-        if (nights !== expectedNights) {
+        const expectedNights = getNightsBetween(checkIn, checkOut);
+        if (answers.travel_timing === "exact_dates" && nights !== expectedNights) {
           setValidationError("Number of nights must match the selected dates.");
+          return false;
+        }
+        if (
+          answers.travel_timing === "flexible" &&
+          expectedNights !== null &&
+          nights > expectedNights
+        ) {
+          setValidationError(
+            "Number of nights cannot be longer than your selected date range.",
+          );
           return false;
         }
       }
@@ -735,7 +758,7 @@ export function JourneyQuiz() {
       departure_location: String(answers.departure_location || "").trim(),
       travel_distance: String(answers.travel_distance) as VelariIntake["travel_distance"],
       travel_timing: timing,
-      ...(timing === "exact_dates" ? {
+      ...(timing === "exact_dates" || timing === "flexible" ? {
         check_in_date: String(answers.check_in_date || ""),
         check_out_date: String(answers.check_out_date || ""),
       } : {}),
@@ -1208,7 +1231,8 @@ export function JourneyQuiz() {
               </div>
               {answers.travel_timing && (
                 <div className="conditional-panel timing-panel">
-                  {answers.travel_timing === "exact_dates" && (
+                  {(answers.travel_timing === "exact_dates" ||
+                    answers.travel_timing === "flexible") && (
                     <div className="date-grid">
                       <label>
                         Check-in
@@ -1257,6 +1281,19 @@ export function JourneyQuiz() {
                     <Input
                       type="number"
                       min="1"
+                      max={
+                        answers.travel_timing === "flexible"
+                          ? String(
+                              Math.max(
+                                1,
+                                getNightsBetween(
+                                  String(answers.check_in_date || ""),
+                                  String(answers.check_out_date || ""),
+                                ) || 1,
+                              ),
+                            )
+                          : undefined
+                      }
                       inputMode="numeric"
                       value={String(answers.trip_nights || "")}
                       onChange={(event) =>
