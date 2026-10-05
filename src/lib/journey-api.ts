@@ -61,35 +61,40 @@ export type SuggestedCity = {
   destinationId: string;
   cityName: string;
   countryName: string;
-  worldRegion?: string;
   cityImage: string[];
-  latitude: number | null;
-  longitude: number | null;
-  numberOfDays: number;
   description: string;
+  primaryFeeling?: string;
   matchScore?: number;
   matchReasons: string[];
   tradeoffs: string[];
   unresolvedFacts: string[];
-  warnings: string[];
-  restrictionChecks: Record<string, unknown>[];
-  distanceCheck?: Record<string, unknown>;
-  verification?: Record<string, unknown>;
-  evidence?: Record<string, unknown>;
 };
 
 export type TourActivity = {
+  itemType?: "experience" | "meal" | "transfer" | "free_time";
   activityName: string;
   activityDescription: string;
-  activityLocation: string;
   activityAddress: string;
   activityImage: string[];
   activityTime: string;
-  activityCost: number;
-  distanceFromPreviousKm?: number | null;
-  placeId: string | null;
-  businessStatus?: string;
-  availabilityNote: string;
+  whySelected?: string;
+  travelMinutesFromPrevious?: number | null;
+  travelFrom?: string;
+  priceIndication?: string;
+  rating?: number | null;
+  openSlot?: boolean;
+  transferMinutes?: number | null;
+  transferBufferMinutes?: number | null;
+  includesFerry?: boolean;
+  viator?: {
+    product_code?: string;
+    title?: string;
+    booking_url?: string;
+    rating?: number;
+    review_count?: number;
+    from_price?: number;
+    currency?: string;
+  };
 };
 
 export type StayDetails = {
@@ -98,35 +103,75 @@ export type StayDetails = {
   rating?: number;
   priceLevel?: string;
   photos: string[];
-  averageNightlyPrice?: number;
-  budgetTier?: string;
-  facilities: string[];
-  website?: string;
+  averageNightlyPrice?: number | string;
+  whySelected?: string;
   estimateNote?: string;
-  priceStatus?: string;
-  availabilityStatus?: string;
 };
 
 export type FeelingBlock = {
-  title: string;
-  feelings: Record<string, unknown>[];
   headline: string;
-  intention: string;
-  narrative?: string | null;
+  primaryFeeling?: string;
+  explanation?: string;
   markdown?: string;
-  supportingExperiences: Record<string, unknown>[];
-  note?: string;
-  alignment?: Record<string, unknown>;
 };
 
-export type BudgetCheck = {
-  budgetPerNightUsd: number;
-  budgetOpenEnded: boolean;
-  rooms: number;
-  estimatedStayNightlyUsd?: number | null;
-  stayWithinBudget?: boolean | null;
-  status: string;
-  note: string;
+export type Stop = {
+  stop: number;
+  baseArea: string;
+  nights: number;
+  firstDay: number;
+  lastDay: number;
+  stay?: StayDetails;
+};
+
+export type TourPlanDay = {
+  day: number;
+  stop?: number;
+  dayType?: "standard" | "transfer";
+  activities: TourActivity[];
+};
+
+export type PriceBreakdown = {
+  currency?: string;
+  appliesTo?: string;
+  lines: Array<{
+    category: string;
+    label: string;
+    amount: number | null;
+    perPerson?: number | null;
+    basis: string;
+    details: string[];
+  }>;
+  total: number | null;
+  totalLabel?: string;
+  totalWithheldReason?: string | null;
+  whatMayVary?: string;
+};
+
+export type DateRecommendation = {
+  label: string;
+  checkIn: string;
+  checkOut: string;
+  weekdays: string[];
+  nights: number;
+  reasons: string[];
+  considerations: string[];
+  checkInWeekday?: string;
+  checkOutWeekday?: string;
+  matchScore?: number;
+};
+
+export type TravelDateRecommendations = {
+  recommended: DateRecommendation;
+  alternatives: DateRecommendation[];
+  summary: string;
+  availabilityNote: string;
+  status?: string;
+  window?: {
+    earliestCheckIn?: string;
+    latestCheckOut?: string;
+    note?: string;
+  };
 };
 
 export type JourneyHistory = {
@@ -154,13 +199,15 @@ export type JourneyHistory = {
     tripLengthDays?: number;
     preferredEnvironments?: string[];
   };
-  stay?: StayDetails;
+  // Intake is used only to request date recommendations; it must never be rendered.
+  intake?: VelariIntake;
   feelingBlock?: FeelingBlock;
-  budgetCheck?: BudgetCheck;
-  tourPlan?: { day: number; activities: TourActivity[] }[];
-  totalCostEstimate?: number;
-  packingTips?: string;
-  travelTips?: string;
+  bookingStatus?: { readyToBook: boolean; guestLabel: string };
+  stops?: Stop[];
+  tourPlan?: TourPlanDay[];
+  priceBreakdown?: PriceBreakdown;
+  guestNotes?: string[];
+  validation?: { displayReady: boolean };
 };
 
 export type PaymentIntentData = {
