@@ -106,24 +106,26 @@ export async function downloadItineraryPdf(history: JourneyHistory, city: string
   });
   y += 53;
 
-  if (history.stay?.name) {
+  (history.stops ?? []).forEach((stop) => {
+    if (!stop.stay?.name) return;
+    ensureSpace(28);
     doc.setTextColor(...olive);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(8);
-    doc.text("RECOMMENDED STAY", margin, y);
+    doc.text(`STAY · ${pdfText(stop.baseArea).toUpperCase()} · DAYS ${stop.firstDay}-${stop.lastDay}`, margin, y);
     y += 6;
     doc.setTextColor(...ink);
     doc.setFont("times", "bold");
     doc.setFontSize(15);
-    doc.text(pdfText(history.stay.name), margin, y);
+    doc.text(pdfText(stop.stay.name), margin, y);
     y += 6;
     doc.setTextColor(...muted);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
-    const stayMeta = [history.stay.address, history.stay.rating ? `Rating ${history.stay.rating}` : "", history.stay.priceLevel || ""].filter(Boolean).join("  |  ");
+    const stayMeta = [stop.stay.address, stop.stay.rating ? `Rating ${stop.stay.rating}` : "", stop.stay.priceLevel || ""].filter(Boolean).join("  |  ");
     doc.text(pdfText(stayMeta), margin, y, { maxWidth: contentWidth });
     y += 12;
-  }
+  });
 
   plans.forEach((plan, planIndex) => {
     ensureSpace(28);
@@ -145,7 +147,7 @@ export async function downloadItineraryPdf(history: JourneyHistory, city: string
 
     (plan.activities ?? []).forEach((activity) => {
       const descriptionLines = doc.splitTextToSize(pdfText(activity.activityDescription), contentWidth - 14) as string[];
-      const location = activity.activityLocation || activity.activityAddress || city;
+      const location = activity.activityAddress || city;
       const locationLines = doc.splitTextToSize(pdfText(location), contentWidth - 42) as string[];
       const blockHeight = Math.max(31, 25 + descriptionLines.length * 4 + locationLines.length * 3.5);
       ensureSpace(blockHeight + 5);
@@ -167,19 +169,21 @@ export async function downloadItineraryPdf(history: JourneyHistory, city: string
       const metaY = y + 21 + descriptionLines.length * 4;
       doc.setFontSize(7.5);
       doc.text(locationLines, margin + 5, metaY);
-      doc.setTextColor(...olive);
-      doc.setFont("helvetica", "bold");
-      doc.text(money.format(activity.activityCost || 0), pageWidth - margin - 5, metaY, { align: "right" });
+      if (activity.priceIndication) {
+        doc.setTextColor(...olive);
+        doc.setFont("helvetica", "bold");
+        doc.text(pdfText(activity.priceIndication), pageWidth - margin - 5, metaY, { align: "right" });
+      }
       y += blockHeight + 5;
     });
     y += 6;
   });
 
-  const notes = [
-    ["Packing tips", history.packingTips],
-    ["Travel tips", history.travelTips],
-    ["Estimated activity total", history.totalCostEstimate != null ? money.format(history.totalCostEstimate) : undefined],
-  ].filter((item): item is [string, string] => Boolean(item[1]));
+  const notes: [string, string][] = [
+    ...(history.guestNotes ?? []).map((note) => ["Good to know", note] as [string, string]),
+    ...(history.priceBreakdown?.total != null ? [[history.priceBreakdown.totalLabel || "Estimated total", money.format(history.priceBreakdown.total)]] as [string, string][] : []),
+    ...(history.priceBreakdown?.totalWithheldReason ? [["Pricing note", history.priceBreakdown.totalWithheldReason]] as [string, string][] : []),
+  ];
 
   notes.forEach(([title, body]) => {
     const lines = doc.splitTextToSize(pdfText(body), contentWidth - 10) as string[];

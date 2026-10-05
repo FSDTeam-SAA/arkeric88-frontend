@@ -51,10 +51,12 @@ import {
 import { countries } from "@/lib/countries";
 import {
   ApiError,
+  DateRecommendation,
   journeyApi,
   PaymentIntentData,
   Restriction,
   RestrictionSeverity,
+  TravelDateRecommendations,
   VelariIntake,
 } from "@/lib/journey-api";
 import {
@@ -74,6 +76,48 @@ type LocationSuggestion = {
 const optionIcons = [Sparkles, Compass, Star, User, MapPin, Home];
 const draftKey = "velari-journey-draft";
 const draftVersion = 6;
+
+type DateRecommendationApiResponse = {
+  recommended: Record<string, unknown>;
+  alternatives?: Record<string, unknown>[];
+  summary?: string;
+  availabilityNote?: string;
+  availability_note?: string;
+  status?: string;
+  window?: Record<string, unknown>;
+};
+
+function stringList(value: unknown) {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+}
+
+function normalizeDateRecommendation(data: DateRecommendationApiResponse): TravelDateRecommendations {
+  const option = (value: Record<string, unknown>): DateRecommendation => ({
+    label: String(value.label || "Recommended dates"),
+    checkIn: String(value.checkIn || value.check_in || ""),
+    checkOut: String(value.checkOut || value.check_out || ""),
+    weekdays: stringList(value.weekdays),
+    nights: Number(value.nights || 0),
+    reasons: stringList(value.reasons),
+    considerations: stringList(value.considerations),
+    checkInWeekday: typeof value.checkInWeekday === "string" ? value.checkInWeekday : typeof value.check_in_weekday === "string" ? value.check_in_weekday : undefined,
+    checkOutWeekday: typeof value.checkOutWeekday === "string" ? value.checkOutWeekday : typeof value.check_out_weekday === "string" ? value.check_out_weekday : undefined,
+    matchScore: typeof value.matchScore === "number" ? value.matchScore : typeof value.match_score === "number" ? value.match_score : undefined,
+  });
+  const window = data.window || {};
+  return {
+    recommended: option(data.recommended),
+    alternatives: (data.alternatives || []).slice(0, 2).map(option),
+    summary: data.summary || "Here are the dates that best fit your trip preferences.",
+    availabilityNote: data.availabilityNote || data.availability_note || "These dates are suggestions only; live availability and prices have not been checked.",
+    status: data.status,
+    window: {
+      earliestCheckIn: typeof window.earliestCheckIn === "string" ? window.earliestCheckIn : typeof window.earliest_check_in === "string" ? window.earliest_check_in : undefined,
+      latestCheckOut: typeof window.latestCheckOut === "string" ? window.latestCheckOut : typeof window.latest_check_out === "string" ? window.latest_check_out : undefined,
+      note: typeof window.note === "string" ? window.note : undefined,
+    },
+  };
+}
 
 function answerLabel(question: { options?: QuizOption[] }, value: string) {
   return (
@@ -306,6 +350,10 @@ export function JourneyQuiz() {
   const [paymentError, setPaymentError] = useState("");
   const [paymentErrorSources, setPaymentErrorSources] = useState<string[]>([]);
   const [intent, setIntent] = useState<PaymentIntentData | null>(null);
+  const [dateRecommendations, setDateRecommendations] = useState<TravelDateRecommendations | null>(null);
+  const [selectedRecommendedDate, setSelectedRecommendedDate] = useState<DateRecommendation | null>(null);
+  const [dateRecommendationLoading, setDateRecommendationLoading] = useState(false);
+  const [dateRecommendationError, setDateRecommendationError] = useState("");
   const [locationSuggestions, setLocationSuggestions] = useState<
     LocationSuggestion[]
   >([]);
@@ -768,6 +816,38 @@ export function JourneyQuiz() {
       currency: "USD",
     };
   }, [answers, budget, selectedValues]);
+
+  const applyRecommendedDates = (option: DateRecommendation) => {
+    setSelectedRecommendedDate(option);
+    setAnswers((current) => ({
+      ...current,
+      travel_timing: "exact_dates",
+      check_in_date: option.checkIn,
+      check_out_date: option.checkOut,
+      trip_nights: String(option.nights),
+    }));
+    setValidationError("");
+  };
+
+  const recommendTravelDates = async () => {
+    if (answers.travel_timing !== "flexible" || !validateStep()) return;
+    if (!token) { setDateRecommendationError("Your session has expired. Please sign in again."); return; }
+    const intakePayload = Object.fromEntries(Object.entries(intake).filter(([key]) => !["budget_per_night", "check_in_date", "check_out_date", "currency"].includes(key)));
+    setDateRecommendationLoading(true); setDateRecommendationError(""); setDateRecommendations(null); setSelectedRecommendedDate(null);
+    try {
+      const data = await journeyApi<DateRecommendationApiResponse>("/history/recommend-travel-dates", token, {
+        method: "POST",
+        body: JSON.stringify({
+          ...intakePayload,
+          earliest_check_in: intake.check_in_date,
+          latest_check_out: intake.check_out_date,
+        }),
+      });
+      setDateRecommendations(normalizeDateRecommendation(data));
+    } catch (caught) {
+      setDateRecommendationError(caught instanceof Error ? caught.message : "Unable to recommend travel dates. Please try again.");
+    } finally { setDateRecommendationLoading(false); }
+  };
 
   const initializePayment = useCallback(async () => {
     if (!token) {
@@ -1235,7 +1315,7 @@ export function JourneyQuiz() {
                     answers.travel_timing === "flexible") && (
                     <div className="date-grid">
                       <label>
-                        Check-in
+                        {answers.travel_timing === "flexible" ? "Earliest check-in" : "Check-in"}
                         <Input
                           type="date"
                           min={new Date().toISOString().slice(0, 10)}
@@ -1246,7 +1326,7 @@ export function JourneyQuiz() {
                         />
                       </label>
                       <label>
-                        Check-out
+                        {answers.travel_timing === "flexible" ? "Latest check-out" : "Check-out"}
                         <Input
                           type="date"
                           min={String(answers.check_in_date || "")}
@@ -1277,7 +1357,7 @@ export function JourneyQuiz() {
                     </label>
                   )}
                   <label className="nights-field">
-                    Number of nights
+                    {answers.travel_timing === "flexible" ? "Trip nights" : "Number of nights"}
                     <Input
                       type="number"
                       min="1"
@@ -1302,7 +1382,23 @@ export function JourneyQuiz() {
                       placeholder="5"
                     />
                   </label>
+                  {answers.travel_timing === "flexible" && (
+                    <button
+                      type="button"
+                      className="recommend-dates-button"
+                      onClick={() => void recommendTravelDates()}
+                      disabled={dateRecommendationLoading}
+                    >
+                      {dateRecommendationLoading ? <><Loader2 className="spin" size={15} /> Finding dates…</> : <><Sparkles size={15} /> Recommend dates</>}
+                    </button>
+                  )}
                 </div>
+              )}
+              {(dateRecommendations || dateRecommendationError) && (
+                <section className="date-recommendations-panel" aria-live="polite">
+                  <div className="date-recommendations-heading"><div><small>PERSONALIZED DATE OPTIONS</small><h2>Dates that fit your trip</h2></div>{dateRecommendations?.status && <span>{dateRecommendations.status.replaceAll("_", " ")}</span>}</div>
+                  {dateRecommendationError ? <div className="date-recommendation-error"><p>{dateRecommendationError}</p><button type="button" onClick={() => void recommendTravelDates()}>Try again</button></div> : dateRecommendations && <><p className="date-recommendations-summary">{dateRecommendations.summary}</p>{dateRecommendations.window?.note && <p className="date-window-note">{dateRecommendations.window.note}</p>}<div className="date-recommendation-options">{[dateRecommendations.recommended, ...dateRecommendations.alternatives].map((option) => <article key={`${option.checkIn}-${option.checkOut}`} className={selectedRecommendedDate?.checkIn === option.checkIn ? "selected" : ""}><button type="button" className="date-option-choice" onClick={() => applyRecommendedDates(option)}><div><strong>{option.label}</strong>{option.matchScore != null && <span>{option.matchScore}% match</span>}</div><b>{option.checkInWeekday ? `${option.checkInWeekday}, ` : ""}{option.checkIn} → {option.checkOutWeekday ? `${option.checkOutWeekday}, ` : ""}{option.checkOut}</b><small>{option.nights} night{option.nights === 1 ? "" : "s"}</small>{selectedRecommendedDate?.checkIn === option.checkIn && <em>Selected — dates added above</em>}</button>{(option.reasons.length > 0 || option.considerations.length > 0) && <details><summary>Why this date works</summary>{option.reasons.length > 0 && <ul>{option.reasons.map((reason) => <li key={reason}>{reason}</li>)}</ul>}{option.considerations.length > 0 && <p><strong>Consider:</strong> {option.considerations.join(" ")}</p>}</details>}</article>)}</div><p className="date-availability-note">{dateRecommendations.availabilityNote}</p></>}
+                </section>
               )}
             </>
           )}

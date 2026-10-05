@@ -1823,6 +1823,66 @@ footer {
 .nights-field {
   width: 125px;
 }
+.recommend-dates-button {
+  min-height: 40px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid var(--olive);
+  border-radius: 7px;
+  background: var(--olive);
+  color: white;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.recommend-dates-button:disabled { cursor: wait; opacity: .7; }
+.date-recommendations-panel {
+  width: min(790px, 100%);
+  margin: 18px auto 0;
+  padding: 20px;
+  border: 1px solid rgba(94, 103, 85, .28);
+  border-radius: 12px;
+  background: #fffdf9;
+  color: #4e514a;
+  text-align: left;
+}
+.date-recommendations-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.date-recommendations-heading small { color: #6a755f; font-size: 10px; letter-spacing: .08em; }
+.date-recommendations-heading h2 { margin: 4px 0 0; font-size: 24px; font-weight: 500; }
+.date-recommendations-heading > span { padding: 5px 8px; border-radius: 999px; background: #edf0e8; color: #5f6b55; font-size: 9px; letter-spacing: .05em; text-transform: capitalize; }
+.date-recommendations-summary { margin: 12px 0 8px; color: #66645e; font-size: 13px; line-height: 1.55; }
+.date-window-note { margin: 0 0 14px; color: #78746d; font-size: 11px; line-height: 1.45; }
+.date-recommendation-options {
+  max-height: min(42vh, 390px);
+  padding-right: 5px;
+  display: grid;
+  gap: 9px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: #9ea494 transparent;
+  scrollbar-width: thin;
+}
+.date-recommendation-options article { overflow: hidden; border: 1px solid #d7cdc1; border-radius: 8px; background: #f8f4ed; }
+.date-recommendation-options article:hover, .date-recommendation-options article.selected { border-color: var(--olive); box-shadow: inset 0 0 0 1px var(--olive); background: #eef0e9; }
+.date-option-choice { width: 100%; padding: 13px 15px; border: 0; background: transparent; color: #4e514a; cursor: pointer; text-align: left; }
+.date-option-choice > div { display: flex; justify-content: space-between; gap: 12px; }
+.date-option-choice strong { font-size: 14px; }
+.date-option-choice span { color: #607056; font-size: 11px; font-weight: 600; }
+.date-option-choice b { display: block; margin-top: 6px; font-size: 12px; font-weight: 500; }
+.date-option-choice small { display: block; margin-top: 3px; color: #78746d; font-size: 11px; }
+.date-option-choice em { display: inline-block; margin-top: 8px; color: #56614f; font-size: 11px; font-style: normal; font-weight: 600; }
+.date-recommendation-options details { border-top: 1px solid rgba(94, 103, 85, .16); }
+.date-recommendation-options summary { padding: 9px 15px; color: #63705b; cursor: pointer; font-size: 11px; font-weight: 600; }
+.date-recommendation-options details ul { margin: 0; padding: 0 15px 8px 30px; color: #66645e; font-size: 11px; line-height: 1.45; }
+.date-recommendation-options details p { margin: 0; padding: 0 15px 10px; color: #6c6962; font-size: 11px; line-height: 1.45; }
+.date-availability-note { margin: 14px 0 0; padding: 10px 12px; border-radius: 7px; background: #f1eee7; color: #716e67; font-size: 11px; line-height: 1.5; }
+.date-recommendation-error { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; color: #8e453e; font-size: 12px; }
+.date-recommendation-error p { margin: 0; }
+.date-recommendation-error button { padding: 8px 11px; border: 1px solid #a76158; border-radius: 999px; background: transparent; color: #8e453e; font: inherit; font-size: 11px; cursor: pointer; }
 .why-we-ask {
   width: min(640px, 100%);
   margin: 24px auto 0;
@@ -2017,9 +2077,10 @@ footer {
   font-weight: 500 !important;
 }
 .quiz-continue {
-  min-width: 150px;
-  height: 42px;
-  padding: 0 24px;
+  min-width: 168px;
+  min-height: 50px;
+  margin-top: 28px;
+  padding: 0 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2028,6 +2089,8 @@ footer {
   border-radius: 999px;
   background: var(--olive);
   color: white;
+  font-size: 15px;
+  font-weight: 500;
   cursor: pointer;
   transition: 0.2s;
 }
@@ -2396,6 +2459,21 @@ footer {
 .itinerary-detail-card h2,
 .itinerary-detail-card h3 { margin: 8px 0; font-weight: 500; }
 .itinerary-detail-card p { margin: 7px 0; color: #5e5c57; line-height: 1.55; }
+.stop-stay strong { display: block; margin: 4px 0; }
+.stop-stay p svg { vertical-align: -2px; }
+.price-line, .price-total { display: flex; justify-content: space-between; gap: 18px; padding: 11px 0; border-bottom: 1px solid #d7cdc1; }
+.price-line > div { display: grid; gap: 3px; }
+.price-line small, .price-breakdown > small, .guest-notes small { display: block; }
+.price-line b, .price-total b { white-space: nowrap; color: #4f5949; }
+.price-total { border-bottom: 0; font-size: 16px; }
+.booking-label { padding-top: 10px; border-top: 1px solid #d7cdc1; font-size: 12px; }
+.guest-notes ul { margin: 9px 0 0; padding-left: 18px; color: #5e5c57; line-height: 1.55; }
+.timeline-transfer, .timeline-open-time { min-height: unset !important; padding: 14px 18px !important; gap: 16px; border-style: dashed !important; background: #f3f0e9 !important; }
+.timeline-transfer time, .timeline-open-time time { min-width: 86px; color: #63705b; font-weight: 600; }
+.timeline-transfer p, .timeline-open-time p { margin-top: 4px; }
+.activity-why { color: #56614f; }
+.viator-link { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 5px; margin-top: 12px; color: #536547; font-size: 12px; font-weight: 600; }
+.viator-link small { width: 100%; margin-top: 2px; font-weight: 400; }
 .activity-verification { margin: 10px 0 0; color: #697262; font-size: 11px; }
 .match-grid {
   max-width: 1180px;
@@ -3245,6 +3323,12 @@ footer {
   }
   .nights-field {
     width: min(160px, 100%);
+  }
+  .recommend-dates-button {
+    width: 100%;
+  }
+  .date-recommendations-panel {
+    padding: 15px;
   }
   .payment-card {
     max-height: calc(100dvh - 24px);
