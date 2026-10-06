@@ -160,7 +160,7 @@ function PaymentForm({
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState("");
   const [cardholderName, setCardholderName] = useState(name || "");
-  const [country, setCountry] = useState("BD");
+  const [country, setCountry] = useState("US");
   const [postalCode, setPostalCode] = useState("");
   const cardStyle = {
     base: {
