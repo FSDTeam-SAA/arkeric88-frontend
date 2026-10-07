@@ -488,7 +488,11 @@ blockquote {
   display: flex;
   align-items: center;
   color: white;
-  background: url('/images/hero-banner.jpg') center 45% / cover no-repeat;
+  overflow: hidden;
+}
+.hero-image {
+  object-fit: cover;
+  object-position: 50% 52%;
 }
 .hero-shade {
   position: absolute;
@@ -597,15 +601,28 @@ blockquote {
   gap: 18px;
 }
 .step-card {
-  min-height: 190px;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 0;
+  background: rgba(181, 163, 148, 0.24);
+  text-align: left;
+}
+.step-card-image,
+.sample-card-image {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+}
+.step-card-image img,
+.sample-card-image img {
+  object-fit: cover;
+}
+.step-card-content {
   padding: 30px;
   display: grid;
   grid-template-columns: 38px minmax(0, 1fr);
   gap: 18px;
   align-items: start;
-  border-radius: 0;
-  background: rgba(181, 163, 148, 0.24);
-  text-align: left;
 }
 .step-number {
   color: #a88b4f;
@@ -662,7 +679,7 @@ blockquote {
   gap: 20px;
 }
 .sample-journey-card {
-  min-height: 250px;
+  min-height: 0;
   padding: 24px 28px 25px;
   border: 1px solid rgba(94, 103, 85, 0.14);
   position: relative;
@@ -767,9 +784,9 @@ blockquote {
     grid-template-columns: 1fr;
   }
   .sample-journey-card {
-    min-height: 225px;
     padding: 22px;
   }
+  .step-card-content { padding: 22px; }
   .sample-card-copy h3 {
     font-size: 30px;
   }
@@ -1332,7 +1349,9 @@ footer {
   .copyright {
     margin-top: 45px;
     flex-direction: column;
+    align-items: center;
     gap: 8px;
+    text-align: center;
   }
   .desktop-break {
     display: none;

@@ -1,9 +1,18 @@
 import Link from "next/link";
+import Image from "next/image";
 import { CtaLink } from "../components/CtaLink";
 
 export function HeroSection() {
   return (
     <section className="hero" id="home">
+      <Image
+        className="hero-image"
+        src="/images/velari/01_Homepage_Hero.png"
+        alt="Sunrise over a Mediterranean cliffside terrace with coffee, a travel journal, and sea views."
+        fill
+        priority
+        sizes="100vw"
+      />
       <div className="hero-shade" />
       <div className="site-container hero-container">
         <div className="hero-content">
