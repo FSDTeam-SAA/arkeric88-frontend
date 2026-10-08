@@ -1,8 +1,8 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import Image from 'next/image'
-import { FormEvent, useCallback, useEffect, useState } from 'react'
+import Link from "next/link";
+import Image from "next/image";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import {
   Check,
   Eye,
@@ -11,107 +11,107 @@ import {
   LockKeyhole,
   Trash2,
   UserRound,
-} from 'lucide-react'
-import { signOut, useSession } from 'next-auth/react'
-import { toast } from 'sonner'
-import { NavbarSection } from '@/components/landing/sections/NavbarSection'
-import { FooterSection } from '@/components/landing/sections/FooterSection'
-import { Skeleton } from '@/components/ui/skeleton'
-import { useRef } from 'react'
-import { Camera } from 'lucide-react'
+} from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
+import { toast } from "sonner";
+import { NavbarSection } from "@/components/landing/sections/NavbarSection";
+import { FooterSection } from "@/components/landing/sections/FooterSection";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useRef } from "react";
+import { Camera } from "lucide-react";
 
-type AccountSection = 'history' | 'personal' | 'password'
+type AccountSection = "history" | "personal" | "password";
 type Profile = {
-  fullName?: string
-  email?: string
-  phoneNumber?: string
-  gender?: string
-  bio?: string
-  address?: string
-  city?: string
-  country?: string
-  postcode?: string
-  profilePicture?: string
-}
+  fullName?: string;
+  email?: string;
+  phoneNumber?: string;
+  gender?: string;
+  bio?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+  postcode?: string;
+  profilePicture?: string;
+};
 type HistoryRow = {
-  _id: string
-  selectedCity?: string
-  preferredDestinations?: string
-  userProfile?: { tripLengthDays?: number; budget?: number }
-  paymentAmount?: number
-  paymentStatus?: string
+  _id: string;
+  selectedCity?: string;
+  preferredDestinations?: string;
+  userProfile?: { tripLengthDays?: number; budget?: number };
+  paymentAmount?: number;
+  paymentStatus?: string;
   aiAnalysisStatus?:
-    | 'pending'
-    | 'suggested_cities_ready'
-    | 'completed'
-    | 'failed'
-  createdAt?: string
+    | "pending"
+    | "suggested_cities_ready"
+    | "completed"
+    | "failed";
+  createdAt?: string;
   suggestedCities?: {
-    cityName?: string
-    countryName?: string
-    numberOfDays?: number
-  }[]
-}
+    cityName?: string;
+    countryName?: string;
+    numberOfDays?: number;
+  }[];
+};
 const API = (
   process.env.NEXT_PUBLIC_BACKEND_URL ||
   process.env.NEXT_PUBLIC_API_URL ||
-  'http://localhost:5000/api/v1'
-).replace(/\/$/, '')
+  "http://localhost:5000/api/v1"
+).replace(/\/$/, "");
 const menu = [
   {
-    id: 'history',
-    label: 'Search History',
-    href: '/account/search-history',
+    id: "history",
+    label: "Search History",
+    href: "/account/search-history",
     icon: History,
   },
   {
-    id: 'personal',
-    label: 'Personal Information',
-    href: '/account/personal-information',
+    id: "personal",
+    label: "Personal Information",
+    href: "/account/personal-information",
     icon: UserRound,
   },
   {
-    id: 'password',
-    label: 'Change Password',
-    href: '/account/change-password',
+    id: "password",
+    label: "Change Password",
+    href: "/account/change-password",
     icon: LockKeyhole,
   },
-] as const
+] as const;
 
 function useToken() {
-  const { data: session } = useSession()
-  return (session?.user as { accessToken?: string } | undefined)?.accessToken
+  const { data: session } = useSession();
+  return (session?.user as { accessToken?: string } | undefined)?.accessToken;
 }
 async function apiRequest(path: string, token: string, init?: RequestInit) {
   const response = await fetch(`${API}${path}`, {
     ...init,
     headers: { Authorization: `Bearer ${token}`, ...(init?.headers || {}) },
-  })
-  const result = await response.json()
+  });
+  const result = await response.json();
   if (!response.ok || !result?.success)
-    throw new Error(result?.message || 'Request failed')
-  return result
+    throw new Error(result?.message || "Request failed");
+  return result;
 }
 
 export function AccountPage({ section }: { section: AccountSection }) {
-  const [logoutOpen, setLogoutOpen] = useState(false)
+  const [logoutOpen, setLogoutOpen] = useState(false);
   return (
     <main className="account-page">
       <NavbarSection activePage="none" accountMode />
       <section className="account-area">
         <aside className="account-sidebar">
-          {menu.map(item => {
-            const Icon = item.icon
+          {menu.map((item) => {
+            const Icon = item.icon;
             return (
               <Link
                 key={item.id}
                 href={item.href}
-                className={section === item.id ? 'active' : ''}
+                className={section === item.id ? "active" : ""}
               >
                 <Icon size={17} />
                 <span>{item.label}</span>
               </Link>
-            )
+            );
           })}
           <button
             type="button"
@@ -122,9 +122,9 @@ export function AccountPage({ section }: { section: AccountSection }) {
           </button>
         </aside>
         <div className="account-content">
-          {section === 'history' && <SearchHistory />}
-          {section === 'personal' && <PersonalInformation />}
-          {section === 'password' && <ChangePassword />}
+          {section === "history" && <SearchHistory />}
+          {section === "personal" && <PersonalInformation />}
+          {section === "password" && <ChangePassword />}
         </div>
       </section>
       <FooterSection />
@@ -160,7 +160,7 @@ export function AccountPage({ section }: { section: AccountSection }) {
               <button
                 type="button"
                 className="logout-confirm"
-                onClick={() => signOut({ callbackUrl: '/' })}
+                onClick={() => signOut({ callbackUrl: "/" })}
               >
                 Log Out
               </button>
@@ -169,65 +169,69 @@ export function AccountPage({ section }: { section: AccountSection }) {
         </div>
       )}
     </main>
-  )
+  );
 }
 
 function SearchHistory() {
-  const token = useToken()
-  const [rows, setRows] = useState<HistoryRow[]>([])
-  const [loading, setLoading] = useState(true)
-  const [page, setPage] = useState(1)
-  const [total, setTotal] = useState(0)
-  const perPage = 10
-  const totalPages = Math.max(1, Math.ceil(total / perPage))
+  const token = useToken();
+  const [rows, setRows] = useState<HistoryRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const perPage = 10;
+  const totalPages = Math.max(1, Math.ceil(total / perPage));
   const load = useCallback(
     (targetPage: number) => {
-      if (!token) return
-      setLoading(true)
+      if (!token) return;
+      setLoading(true);
       apiRequest(
         `/history/my?limit=${perPage}&page=${targetPage}&sortOrder=desc`,
         token,
       )
-        .then(result => {
-          setRows(result.data || [])
-          setTotal(Number(result.meta?.total) || 0)
+        .then((result) => {
+          setRows(result.data || []);
+          setTotal(Number(result.meta?.total) || 0);
         })
-        .catch(error => toast.error(error.message))
-        .finally(() => setLoading(false))
+        .catch((error) => toast.error(error.message))
+        .finally(() => setLoading(false));
     },
     [token],
-  )
+  );
   useEffect(() => {
-    load(page)
-  }, [load, page])
+    load(page);
+  }, [load, page]);
   const remove = async (id: string) => {
-    if (!token) return
+    if (!token) return;
     try {
-      await apiRequest(`/history/my/${id}`, token, { method: 'DELETE' })
-      setTotal(current => Math.max(0, current - 1))
+      await apiRequest(`/history/my/${id}`, token, { method: "DELETE" });
+      setTotal((current) => Math.max(0, current - 1));
       if (rows.length === 1 && page > 1) {
-        setPage(current => current - 1)
+        setPage((current) => current - 1);
       } else {
-        setRows(current => current.filter(row => row._id !== id))
+        setRows((current) => current.filter((row) => row._id !== id));
       }
-      toast.success('History deleted successfully')
+      toast.success("History deleted successfully");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Delete failed')
+      toast.error(error instanceof Error ? error.message : "Delete failed");
     }
-  }
-  const pageItems: (number | 'ellipsis')[] = []
+  };
+  const pageItems: (number | "ellipsis")[] = [];
   if (totalPages <= 7) {
-    for (let item = 1; item <= totalPages; item++) pageItems.push(item)
+    for (let item = 1; item <= totalPages; item++) pageItems.push(item);
   } else {
-    pageItems.push(1)
-    if (page > 3) pageItems.push('ellipsis')
-    for (let item = Math.max(2, page - 1); item <= Math.min(totalPages - 1, page + 1); item++)
-      pageItems.push(item)
-    if (page < totalPages - 2) pageItems.push('ellipsis')
-    pageItems.push(totalPages)
+    pageItems.push(1);
+    if (page > 3) pageItems.push("ellipsis");
+    for (
+      let item = Math.max(2, page - 1);
+      item <= Math.min(totalPages - 1, page + 1);
+      item++
+    )
+      pageItems.push(item);
+    if (page < totalPages - 2) pageItems.push("ellipsis");
+    pageItems.push(totalPages);
   }
-  const start = total === 0 ? 0 : (page - 1) * perPage + 1
-  const end = Math.min(page * perPage, total)
+  const start = total === 0 ? 0 : (page - 1) * perPage + 1;
+  const end = Math.min(page * perPage, total);
   return (
     <div className="history-panel">
       <div className="history-table">
@@ -261,41 +265,41 @@ function SearchHistory() {
             ))}
           </div>
         ) : rows.length ? (
-          rows.map(row => {
+          rows.map((row) => {
             const city =
               row.selectedCity ||
               row.suggestedCities?.[0]?.cityName ||
               row.preferredDestinations ||
-              'Journey'
+              "Journey";
             const days =
               row.userProfile?.tripLengthDays ||
-              row.suggestedCities?.[0]?.numberOfDays
+              row.suggestedCities?.[0]?.numberOfDays;
             const matchingCity =
-              row.suggestedCities?.find(item => item.cityName === city) ||
-              row.suggestedCities?.[0]
-            const country = matchingCity?.countryName || '—'
-            const budget = row.userProfile?.budget
+              row.suggestedCities?.find((item) => item.cityName === city) ||
+              row.suggestedCities?.[0];
+            const country = matchingCity?.countryName || "—";
+            const budget = row.userProfile?.budget;
             const status =
               row.aiAnalysisStatus ||
-              (row.paymentStatus === 'paid' ? 'completed' : 'pending')
+              (row.paymentStatus === "paid" ? "completed" : "pending");
             const statusLabel =
-              status === 'suggested_cities_ready'
-                ? 'Matches ready'
-                : status.charAt(0).toUpperCase() + status.slice(1)
+              status === "suggested_cities_ready"
+                ? "Matches ready"
+                : status.charAt(0).toUpperCase() + status.slice(1);
             const created = row.createdAt
-              ? new Intl.DateTimeFormat('en-US', {
-                  day: '2-digit',
-                  month: 'short',
-                  year: 'numeric',
+              ? new Intl.DateTimeFormat("en-US", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
                 }).format(new Date(row.createdAt))
-              : '—'
+              : "—";
             return (
               <div className="history-row" key={row._id}>
                 <span className="history-destination">{city}</span>
                 <span>{country}</span>
-                <span>{days ? `${days} days` : '—'}</span>
+                <span>{days ? `${days} days` : "—"}</span>
                 <span>
-                  {budget != null ? `$${budget.toLocaleString('en-US')}` : '—'}
+                  {budget != null ? `$${budget.toLocaleString("en-US")}` : "—"}
                 </span>
                 <span>
                   <i className={`history-status ${status}`}>{statusLabel}</i>
@@ -317,7 +321,7 @@ function SearchHistory() {
                   </button>
                 </span>
               </div>
-            )
+            );
           })
         ) : (
           <p className="empty-history">No search history found.</p>
@@ -326,10 +330,10 @@ function SearchHistory() {
       <div className="history-meta">
         <span>
           {loading
-            ? 'Loading results…'
+            ? "Loading results…"
             : total
               ? `Showing ${start}–${end} of ${total}`
-              : 'No results'}
+              : "No results"}
         </span>
         {totalPages > 1 && (
           <div className="pagination" aria-label="Search history pages">
@@ -337,12 +341,12 @@ function SearchHistory() {
               type="button"
               aria-label="Previous page"
               disabled={page <= 1}
-              onClick={() => setPage(current => Math.max(1, current - 1))}
+              onClick={() => setPage((current) => Math.max(1, current - 1))}
             >
               ‹
             </button>
             {pageItems.map((item, index) =>
-              item === 'ellipsis' ? (
+              item === "ellipsis" ? (
                 <span className="pagination-ellipsis" key={`ellipsis-${index}`}>
                   …
                 </span>
@@ -350,7 +354,7 @@ function SearchHistory() {
                 <button
                   type="button"
                   key={item}
-                  className={page === item ? 'active' : ''}
+                  className={page === item ? "active" : ""}
                   onClick={() => setPage(item)}
                 >
                   {item}
@@ -362,7 +366,7 @@ function SearchHistory() {
               aria-label="Next page"
               disabled={page >= totalPages}
               onClick={() =>
-                setPage(current => Math.min(totalPages, current + 1))
+                setPage((current) => Math.min(totalPages, current + 1))
               }
             >
               ›
@@ -371,77 +375,85 @@ function SearchHistory() {
         )}
       </div>
     </div>
-  )
+  );
 }
 
 function PersonalInformation() {
-  const token = useToken()
-  const { update: updateSession } = useSession()
-  const [profile, setProfile] = useState<Profile>({})
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [photoPreview, setPhotoPreview] = useState<string | undefined>()
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const token = useToken();
+  const { update: updateSession } = useSession();
+  const [profile, setProfile] = useState<Profile>({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState<string | undefined>();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    if (!token) return
-    apiRequest('/user/profile', token)
-      .then(result => setProfile(result.data || {}))
-      .catch(error => toast.error(error.message))
-      .finally(() => setLoading(false))
-  }, [token])
-  const pickPhoto = () => fileInputRef.current?.click()
+    if (!token) return;
+    apiRequest("/user/profile", token)
+      .then((result) => setProfile(result.data || {}))
+      .catch((error) => toast.error(error.message))
+      .finally(() => setLoading(false));
+  }, [token]);
+  const pickPhoto = () => fileInputRef.current?.click();
   const onPhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please choose an image file')
-      return
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file");
+      return;
     }
-    setPhotoPreview(URL.createObjectURL(file))
-  }
+    setPhotoPreview(URL.createObjectURL(file));
+  };
   // Remove photo functionality disabled for now
   // const removePhoto = () => {
   //   setPhotoPreview(undefined)
   //   if (fileInputRef.current) fileInputRef.current.value = ''
   // }
   const submit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    if (!token) return
-    setSaving(true)
-    const data = new FormData(event.currentTarget)
+    event.preventDefault();
+    if (!token) return;
+    setSaving(true);
+    const data = new FormData(event.currentTarget);
     try {
-      const result = await apiRequest('/user/profile', token, {
-        method: 'PUT',
+      const result = await apiRequest("/user/profile", token, {
+        method: "PUT",
         body: data,
-      })
-      setProfile(result.data)
-      setPhotoPreview(undefined)
-      if (fileInputRef.current) fileInputRef.current.value = ''
+      });
+      setProfile(result.data);
+      setPhotoPreview(undefined);
+      if (fileInputRef.current) fileInputRef.current.value = "";
       window.dispatchEvent(
-        new CustomEvent('velari:profile-updated', {
+        new CustomEvent("velari:profile-updated", {
           detail: result.data?.profilePicture,
         }),
-      )
-      await updateSession({ profilePicture: result.data?.profilePicture })
-      toast.success('Profile updated successfully')
+      );
+      await updateSession({ profilePicture: result.data?.profilePicture });
+      toast.success("Profile updated successfully");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Update failed')
+      toast.error(error instanceof Error ? error.message : "Update failed");
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
-  if (loading) return <PersonalInformationSkeleton />
-  const displayPhoto = photoPreview || profile.profilePicture
+  };
+  if (loading) return <PersonalInformationSkeleton />;
+  const displayPhoto = photoPreview || profile.profilePicture;
   return (
     <form className="account-card" onSubmit={submit}>
       <div className="account-card-heading">
         <h1>Personal Information</h1>
         <p>Manage your personal information and profile details.</p>
       </div>
+      {/* profile-photo-avatar */}
       <div className="profile-photo">
-        <div className="profile-photo-avatar">
+        <div className="">
           {displayPhoto ? (
-            <Image src={displayPhoto} alt="Profile" width={92} height={92} unoptimized />
+            <Image
+              src={displayPhoto}
+              alt="Profile"
+              width={92}
+              height={92}
+              unoptimized
+               className="w-14 h-14 md:w-20 md:h-20 rounded-full object-contain border border-black/20"
+            />
           ) : (
             <UserRound size={30} />
           )}
@@ -480,21 +492,21 @@ function PersonalInformation() {
       </div>
       <div className="gender-row">
         <label>
-          Male{' '}
+          Male{" "}
           <input
             type="radio"
             name="gender"
             value="male"
-            defaultChecked={profile.gender !== 'female'}
+            defaultChecked={profile.gender !== "female"}
           />
         </label>
         <label>
-          Female{' '}
+          Female{" "}
           <input
             type="radio"
             name="gender"
             value="female"
-            defaultChecked={profile.gender === 'female'}
+            defaultChecked={profile.gender === "female"}
           />
         </label>
       </div>
@@ -540,24 +552,24 @@ function PersonalInformation() {
           Discard Changes
         </button>
         <button disabled={saving} type="submit" className="save">
-          {saving ? 'Saving...' : 'Save Changes'}
+          {saving ? "Saving..." : "Save Changes"}
         </button>
       </div>
     </form>
-  )
+  );
 }
 
 function PersonalInformationSkeleton() {
   const fields = [
-    { key: 'name' },
-    { key: 'email' },
-    { key: 'phone' },
-    { key: 'city' },
-    { key: 'bio', full: true, tall: true },
-    { key: 'address', full: true },
-    { key: 'country' },
-    { key: 'postcode' },
-  ]
+    { key: "name" },
+    { key: "email" },
+    { key: "phone" },
+    { key: "city" },
+    { key: "bio", full: true, tall: true },
+    { key: "address", full: true },
+    { key: "country" },
+    { key: "postcode" },
+  ];
 
   return (
     <div
@@ -581,17 +593,17 @@ function PersonalInformationSkeleton() {
         <Skeleton />
       </div>
       <div className="form-grid">
-        {fields.map(field => (
+        {fields.map((field) => (
           <div
-            className={`profile-skeleton-field${field.full ? ' full' : ''}`}
+            className={`profile-skeleton-field${field.full ? " full" : ""}`}
             key={field.key}
           >
             <Skeleton className="profile-skeleton-label" />
             <Skeleton
               className={
                 field.tall
-                  ? 'profile-skeleton-input tall'
-                  : 'profile-skeleton-input'
+                  ? "profile-skeleton-input tall"
+                  : "profile-skeleton-input"
               }
             />
           </div>
@@ -602,47 +614,47 @@ function PersonalInformationSkeleton() {
         <Skeleton />
       </div>
     </div>
-  )
+  );
 }
 
 function ChangePassword() {
-  const token = useToken()
-  const [visible, setVisible] = useState<Record<string, boolean>>({})
-  const [values, setValues] = useState({ current: '', next: '', confirm: '' })
-  const [saving, setSaving] = useState(false)
+  const token = useToken();
+  const [visible, setVisible] = useState<Record<string, boolean>>({});
+  const [values, setValues] = useState({ current: "", next: "", confirm: "" });
+  const [saving, setSaving] = useState(false);
   const rules = [
-    ['Minimum 8 characters.', values.next.length >= 8],
-    ['At least one uppercase letter.', /[A-Z]/.test(values.next)],
-    ['At least one lowercase letter.', /[a-z]/.test(values.next)],
-    ['At least one number.', /\d/.test(values.next)],
-    ['At least one special character.', /[^A-Za-z0-9]/.test(values.next)],
-    ['No spaces allowed.', values.next.length > 0 && !/\s/.test(values.next)],
-  ] as const
-  const mismatch = values.confirm.length > 0 && values.next !== values.confirm
+    ["Minimum 8 characters.", values.next.length >= 8],
+    ["At least one uppercase letter.", /[A-Z]/.test(values.next)],
+    ["At least one lowercase letter.", /[a-z]/.test(values.next)],
+    ["At least one number.", /\d/.test(values.next)],
+    ["At least one special character.", /[^A-Za-z0-9]/.test(values.next)],
+    ["No spaces allowed.", values.next.length > 0 && !/\s/.test(values.next)],
+  ] as const;
+  const mismatch = values.confirm.length > 0 && values.next !== values.confirm;
   const submit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    if (!token || mismatch || !rules.every(rule => rule[1]))
-      return toast.error('Please meet all password requirements')
-    setSaving(true)
+    event.preventDefault();
+    if (!token || mismatch || !rules.every((rule) => rule[1]))
+      return toast.error("Please meet all password requirements");
+    setSaving(true);
     try {
-      await apiRequest('/auth/change-password', token, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      await apiRequest("/auth/change-password", token, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           oldPassword: values.current,
           newPassword: values.next,
         }),
-      })
-      toast.success('Password changed successfully')
-      setValues({ current: '', next: '', confirm: '' })
+      });
+      toast.success("Password changed successfully");
+      setValues({ current: "", next: "", confirm: "" });
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : 'Password change failed',
-      )
+        error instanceof Error ? error.message : "Password change failed",
+      );
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
   return (
     <form className="account-card password-card" onSubmit={submit}>
       <div className="account-card-heading">
@@ -650,33 +662,33 @@ function ChangePassword() {
         <p>Manage your account security.</p>
       </div>
       <div className="password-grid">
-        {(['current', 'next', 'confirm'] as const).map(name => (
+        {(["current", "next", "confirm"] as const).map((name) => (
           <label
-            className={`field password-field ${name === 'confirm' ? 'confirm' : ''}`}
+            className={`field password-field ${name === "confirm" ? "confirm" : ""}`}
             key={name}
           >
-            {name === 'current'
-              ? 'Current Password'
-              : name === 'next'
-                ? 'New Password'
-                : 'Confirm New Password'}
+            {name === "current"
+              ? "Current Password"
+              : name === "next"
+                ? "New Password"
+                : "Confirm New Password"}
             <span>
               <input
-                type={visible[name] ? 'text' : 'password'}
+                type={visible[name] ? "text" : "password"}
                 value={values[name]}
-                onChange={event =>
-                  setValues(current => ({
+                onChange={(event) =>
+                  setValues((current) => ({
                     ...current,
                     [name]: event.target.value,
                   }))
                 }
-                className={name === 'confirm' && mismatch ? 'invalid' : ''}
+                className={name === "confirm" && mismatch ? "invalid" : ""}
                 required
               />
               <button
                 type="button"
                 onClick={() =>
-                  setVisible(current => ({
+                  setVisible((current) => ({
                     ...current,
                     [name]: !current[name],
                   }))
@@ -690,7 +702,7 @@ function ChangePassword() {
       </div>
       <div className="password-rules">
         {rules.map(([text, valid]) => (
-          <p className={values.next && !valid ? 'invalid' : ''} key={text}>
+          <p className={values.next && !valid ? "invalid" : ""} key={text}>
             <Check size={13} />
             {text}
           </p>
@@ -700,31 +712,31 @@ function ChangePassword() {
       <div className="form-actions">
         <button
           type="button"
-          onClick={() => setValues({ current: '', next: '', confirm: '' })}
+          onClick={() => setValues({ current: "", next: "", confirm: "" })}
           className="discard"
         >
           Discard Changes
         </button>
         <button disabled={saving} type="submit" className="save">
-          {saving ? 'Saving...' : 'Save Changes'}
+          {saving ? "Saving..." : "Save Changes"}
         </button>
       </div>
     </form>
-  )
+  );
 }
 
 function Field({
   label,
-  className = '',
+  className = "",
   ...props
 }: {
-  label: string
-  className?: string
+  label: string;
+  className?: string;
 } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <label className={`field ${className}`}>
       {label}
       <input {...props} />
     </label>
-  )
+  );
 }
