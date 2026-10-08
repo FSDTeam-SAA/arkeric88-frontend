@@ -212,3 +212,14 @@ export const journeyQuestions: QuizQuestion[] = [
 export function getQuizQuestions(): QuizQuestion[] {
   return journeyQuestions;
 }
+
+export function getQuizOptionLabel(value: string): string {
+  if (value === "food_drinks") return "Food & drinks";
+
+  for (const question of journeyQuestions) {
+    const option = question.options?.find((item) => item.value === value);
+    if (option) return option.label;
+  }
+
+  return value.replace(/_/g, " ");
+}

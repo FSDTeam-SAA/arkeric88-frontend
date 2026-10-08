@@ -18,12 +18,18 @@ const API = (
   "http://localhost:5000/api/v1"
 ).replace(/\/$/, "");
 
-export function NavbarSection({ activePage = "home", accountMode = false }: NavbarSectionProps) {
+export function NavbarSection({
+  activePage = "home",
+  accountMode = false,
+}: NavbarSectionProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const { data: session, status } = useSession();
-  const [profilePicture, setProfilePicture] = useState<string | undefined>(session?.user?.profilePicture);
+  const [profilePicture, setProfilePicture] = useState<string | undefined>(
+    session?.user?.profilePicture,
+  );
   const closeMenu = () => setMenuOpen(false);
-  const token = (session?.user as { accessToken?: string } | undefined)?.accessToken;
+  const token = (session?.user as { accessToken?: string } | undefined)
+    ?.accessToken;
 
   useEffect(() => {
     const applyFromEvent = (event: Event) => {
@@ -32,31 +38,100 @@ export function NavbarSection({ activePage = "home", accountMode = false }: Navb
     window.addEventListener("velari:profile-updated", applyFromEvent);
 
     if (status === "authenticated" && token) {
-      fetch(`${API}/user/profile`, { headers: { Authorization: `Bearer ${token}` } })
+      fetch(`${API}/user/profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
         .then((response) => response.json())
         .then((result) => {
-          if (result?.data?.profilePicture) setProfilePicture(result.data.profilePicture);
+          if (result?.data?.profilePicture)
+            setProfilePicture(result.data.profilePicture);
         })
         .catch(() => {});
     }
 
-    return () => window.removeEventListener("velari:profile-updated", applyFromEvent);
+    return () =>
+      window.removeEventListener("velari:profile-updated", applyFromEvent);
   }, [status, token]);
 
   useEffect(() => {
-    if (session?.user?.profilePicture) setProfilePicture(session.user.profilePicture);
+    if (session?.user?.profilePicture)
+      setProfilePicture(session.user.profilePicture);
   }, [session?.user?.profilePicture]);
 
   return (
     <header className="navbar">
       <div className="site-container navbar-container">
-        <Link href="/" className="logo-panel" aria-label="Velari™ home"><Image src="/images/logo.png" alt="Velari™" width={180} height={59} className="logo" priority /></Link>
-        <nav className={menuOpen ? "nav-links open" : "nav-links"} aria-label="Main navigation">
-          <Link href="/" className={activePage === "home" ? "active" : ""} onClick={closeMenu}>Home</Link><Link href="/how-it-works" className={activePage === "how-it-works" ? "active" : ""} onClick={closeMenu}>How It Works</Link>
-          {accountMode || status === "authenticated" ? <Link href="/account/personal-information" onClick={closeMenu}>My Account</Link> : <Link href="/login" onClick={closeMenu}>Log In</Link>}
+        <Link href="/" className="logo-panel" aria-label="Velari™ home">
+          <Image
+            src="/images/logo.png"
+            alt="Velari™"
+            width={180}
+            height={59}
+            className="logo"
+            priority
+          />
+        </Link>
+        <nav
+          className={menuOpen ? "nav-links open" : "nav-links"}
+          aria-label="Main navigation"
+        >
+          <Link
+            href="/"
+            className={activePage === "home" ? "active" : ""}
+            onClick={closeMenu}
+          >
+            Home
+          </Link>
+          <Link
+            href="/how-it-works"
+            className={activePage === "how-it-works" ? "active" : ""}
+            onClick={closeMenu}
+          >
+            How It Works
+          </Link>
+          {accountMode || status === "authenticated" ? (
+            <Link href="/account/personal-information" onClick={closeMenu}>
+              My Account
+            </Link>
+          ) : (
+            <Link href="/login" onClick={closeMenu}>
+              Log In
+            </Link>
+          )}
         </nav>
-        <div className="nav-actions">{accountMode || status === "authenticated" ? <Link href="/account/personal-information" className="account-button" aria-label="My account">{profilePicture ? <Image src={profilePicture} alt="" width={40} height={40} unoptimized className="account-avatar" /> : <UserRound />}</Link> : null}<CtaLink>Begin Your Emotional Journey</CtaLink></div>
-        <button className="menu-button" type="button" onClick={() => setMenuOpen((open) => !open)} aria-expanded={menuOpen} aria-label="Toggle menu">{menuOpen ? <X /> : <Menu />}</button>
+        <div className="nav-actions">
+          {accountMode || status === "authenticated" ? (
+            <Link
+              href="/account/personal-information"
+              className="account-button"
+              aria-label="My account"
+            >
+              {/* account-avatar */}
+              {profilePicture ? (
+                <Image
+                  src={profilePicture}
+                  alt=""
+                  width={40}
+                  height={40}
+                  unoptimized
+                  className="w-9 h-9 md:w-10 md:h-10  rounded-full  border-none  object-contain"
+                />
+              ) : (
+                <UserRound />
+              )}
+            </Link>
+          ) : null}
+          <CtaLink>Begin Your Emotional Journey</CtaLink>
+        </div>
+        <button
+          className="menu-button"
+          type="button"
+          onClick={() => setMenuOpen((open) => !open)}
+          aria-expanded={menuOpen}
+          aria-label="Toggle menu"
+        >
+          {menuOpen ? <X /> : <Menu />}
+        </button>
       </div>
     </header>
   );
