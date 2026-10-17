@@ -25,7 +25,9 @@ import {
   ApiError,
   JourneyHistory,
   journeyApi,
+  saveAiTourPlan,
   SuggestedCity,
+  TourPlanResult,
   VelariIntakeUpdate,
 } from "@/lib/journey-api";
 import { getQuizOptionLabel } from "@/lib/wellness-archetypes";
@@ -367,7 +369,7 @@ export function ResultsPage() {
     }
     setSelectedDestinationId(city.destinationId);
     try {
-      const data = await journeyApi<{ history: JourneyHistory }>(
+      const data = await journeyApi<TourPlanResult>(
         "/history/tour-plan",
         token,
         {
@@ -378,6 +380,7 @@ export function ResultsPage() {
           }),
         },
       );
+      saveAiTourPlan(data.history._id, data.aiResponse);
       router.push(`/itinerary/${data.history._id}`);
     } catch (caught) {
       try {
