@@ -9,7 +9,7 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { FooterSection } from "@/components/landing/sections/FooterSection";
 import { NavbarSection } from "@/components/landing/sections/NavbarSection";
-import { ApiError, JourneyHistory, journeyApi, TourActivity } from "@/lib/journey-api";
+import { ApiError, JourneyHistory, journeyApi, readAiTourPlan, saveAiTourPlan, TourActivity, TourPlanResult, withAiTourPlan } from "@/lib/journey-api";
 import { downloadItineraryPdf } from "@/lib/itinerary-pdf";
 
 function ItinerarySkeleton() {
@@ -63,8 +63,9 @@ export function ItineraryPage({ historyId }: { historyId?: string }) {
     setLoading(true); setError(null);
     try {
       const data = await journeyApi<JourneyHistory>(`/history/my/${encodeURIComponent(historyId)}`, token);
-      if (!data.tourPlan?.length && data.aiAnalysisStatus !== "failed") setError({ message: "The full itinerary hasn't been generated yet. Choose a destination from your results first.", notFound: true });
-      else setHistory(data);
+      const historyWithAiPlan = withAiTourPlan(data, readAiTourPlan(data._id));
+      if (!historyWithAiPlan.tourPlan?.length && historyWithAiPlan.aiAnalysisStatus !== "failed") setError({ message: "The full itinerary hasn't been generated yet. Choose a destination from your results first.", notFound: true });
+      else setHistory(historyWithAiPlan);
     } catch (caught) {
       const apiError = caught as ApiError;
       setError({ message: apiError.message, notFound: apiError.status === 404 || apiError.status === 400 });
@@ -83,8 +84,9 @@ export function ItineraryPage({ historyId }: { historyId?: string }) {
     if (!token || !history?.activitySessionId || regenerating) { toast.error("This itinerary can’t be regenerated because its activity session is unavailable."); return; }
     setRegenerating(true);
     try {
-      const data = await journeyApi<{ history: JourneyHistory }>("/history/regenerate-tour-plan", token, { method: "POST", body: JSON.stringify({ activity_session_id: history.activitySessionId, ...(dayToRegenerate ? { day_to_regenerate: dayToRegenerate } : {}), ...(regenerationInstruction.trim() ? { user_instruction: regenerationInstruction.trim() } : {}) }) });
-      setHistory(data.history); setDayIndex(0); setRegenerationInstruction("");
+      const data = await journeyApi<TourPlanResult>("/history/regenerate-tour-plan", token, { method: "POST", body: JSON.stringify({ activity_session_id: history.activitySessionId, ...(dayToRegenerate ? { day_to_regenerate: dayToRegenerate } : {}), ...(regenerationInstruction.trim() ? { user_instruction: regenerationInstruction.trim() } : {}) }) });
+      saveAiTourPlan(data.history._id, data.aiResponse);
+      setHistory(withAiTourPlan(data.history, data.aiResponse)); setDayIndex(0); setRegenerationInstruction("");
       toast.success(dayToRegenerate ? `Day ${dayToRegenerate} has been refreshed.` : "Your complete itinerary has been refreshed.");
     } catch (caught) { toast.error(caught instanceof Error ? caught.message : "Unable to refresh this itinerary."); }
     finally { setRegenerating(false); }
@@ -107,19 +109,18 @@ export function ItineraryPage({ historyId }: { historyId?: string }) {
     finally { setDownloadingPdf(false); }
   };
 
-  if (needsRegeneration) return <main className="itinerary-page"><NavbarSection activePage="none" /><section className="journey-state"><div className="journey-state-icon"><RefreshCw size={32} /></div><h1>Your itinerary needs a refresh</h1><p>We couldn&apos;t safely show this itinerary yet. Regenerate it and we&apos;ll prepare a new version.</p><div className="itinerary-regeneration recovery"><input value={regenerationInstruction} onChange={(event) => setRegenerationInstruction(event.target.value)} placeholder="Anything you would like changed?" aria-label="Itinerary regeneration instruction" /><button type="button" onClick={() => void regeneratePlan()} disabled={regenerating}>{regenerating ? <><Loader2 className="spin" size={15} /> Regenerating…</> : <><RefreshCw size={15} /> Regenerate itinerary</>}</button></div><Link href={`/results?historyId=${history._id}`}>Back to destinations</Link></section><FooterSection /></main>;
-
   return <main className="itinerary-page"><NavbarSection activePage="none" />
     <section className="itinerary-hero" style={{ backgroundImage: `url(${JSON.stringify(heroImage)})` }}><div className="itinerary-shade" /><button type="button" className="itinerary-back" onClick={goBack} aria-label="Go back"><ArrowLeft size={15} /> Back</button><div className="itinerary-title"><h1>Your Journey to {city}</h1><p>{history.feelingBlock?.headline || "Curated around your travel preferences"}</p></div><span>{city}{cityMatch?.countryName ? `, ${cityMatch.countryName}` : ""} · {plans.length} Days</span><button type="button" onClick={() => void downloadPdf()} disabled={downloadingPdf}>{downloadingPdf ? <><Loader2 className="spin" size={15} /> Creating PDF…</> : <><Download size={15} /> Download PDF</>}</button></section>
     <section className="itinerary-layout"><aside><h3>Your Trip at a Glance</h3><small>Duration</small><strong>{plans.length} Days</strong><small>Destination</small><strong>{city}{cityMatch?.countryName ? `, ${cityMatch.countryName}` : ""}</strong>{history.stops?.length ? <><small>Base areas</small><strong>{history.stops.map((stop) => stop.baseArea).join(" · ")}</strong></> : null}</aside>
       <div className="day-plan">
+        {needsRegeneration && <section className="itinerary-detail-card" role="status"><small>ITINERARY NOTICE</small><h2>Your itinerary may need a refresh</h2><p>Some details may be unavailable, but the AI result below is still available to review. You can regenerate the plan whenever you&apos;re ready.</p>{history.validation?.issues?.length ? <ul>{history.validation.issues.map((issue, index) => <li key={index}>{typeof issue.message === "string" ? issue.message : "An itinerary detail needs attention."}</li>)}</ul> : null}</section>}
         {history.feelingBlock && <section className="itinerary-detail-card feeling-block"><small>YOUR TRIP INTENTION</small><h2>{history.feelingBlock.primaryFeeling || history.feelingBlock.headline}</h2><p style={{ whiteSpace: "pre-line" }}>{history.feelingBlock.markdown || history.feelingBlock.explanation || history.feelingBlock.headline}</p></section>}
         {history.stops?.map((stop) => <section className="itinerary-detail-card stop-stay" key={stop.stop}><small>STOP {stop.stop} · DAYS {stop.firstDay}–{stop.lastDay}</small><h3>{stop.baseArea} · {stop.nights} night{stop.nights === 1 ? "" : "s"}</h3>{stop.stay && <><strong>{stop.stay.name}</strong><p>{stop.stay.address}</p>{stop.stay.rating != null && <p><Star size={13} fill="currentColor" /> {stop.stay.rating}{stop.stay.priceLevel ? ` · ${stop.stay.priceLevel}` : ""}{stop.stay.averageNightlyPrice != null ? ` · ${formatMoney(Number(stop.stay.averageNightlyPrice))} nightly` : ""}</p>}{stop.stay.whySelected && <small>{stop.stay.whySelected}</small>}{stop.stay.estimateNote && <small>{stop.stay.estimateNote}</small>}</>}</section>)}
         {history.priceBreakdown && <section className="itinerary-detail-card price-breakdown"><small>PRICE GUIDE{history.priceBreakdown.appliesTo ? ` · ${history.priceBreakdown.appliesTo}` : ""}</small><h3>Trip pricing</h3>{history.priceBreakdown.lines.map((line) => <div className="price-line" key={`${line.category}-${line.label}`}><div><strong>{line.label}</strong><small>{line.basis}</small>{line.details.map((detail) => <small key={detail}>{detail}</small>)}</div><b>{formatMoney(line.amount, history.priceBreakdown?.currency)}</b></div>)}{history.priceBreakdown.total != null ? <div className="price-total"><strong>{history.priceBreakdown.totalLabel || "Estimated total"}</strong><b>{formatMoney(history.priceBreakdown.total, history.priceBreakdown.currency)}</b></div> : history.priceBreakdown.totalWithheldReason ? <p>{history.priceBreakdown.totalWithheldReason}</p> : null}{history.priceBreakdown.whatMayVary && <small>{history.priceBreakdown.whatMayVary}</small>}{history.bookingStatus?.guestLabel && <p className="booking-label">{history.bookingStatus.guestLabel}</p>}</section>}
         {history.guestNotes?.length ? <section className="itinerary-detail-card guest-notes"><small>GOOD TO KNOW</small><ul>{history.guestNotes.map((note) => <li key={note}>{note}</li>)}</ul></section> : null}
         <div className="itinerary-regeneration"><input value={regenerationInstruction} onChange={(event) => setRegenerationInstruction(event.target.value)} placeholder="How should we change the plan?" aria-label="Itinerary regeneration instruction" /><button type="button" className="match-link" onClick={() => void regeneratePlan()} disabled={regenerating}>{regenerating ? <><Loader2 className="spin" size={13} /> Refreshing…</> : <><RefreshCw size={13} /> Refresh full itinerary</>}</button></div>
         <div className="day-tabs">{plans.map((plan, index) => <button type="button" key={`${plan.day}-${index}`} onClick={() => setDayIndex(index)} className={dayIndex === index ? "active" : ""}>Day {plan.day || index + 1}</button>)}</div>
-        {activeDay && <><h2>Day {activeDay.day || dayIndex + 1}{activeDay.dayType === "transfer" ? " · Transfer day" : ""}</h2><button type="button" className="match-link" onClick={() => void regeneratePlan(activeDay.day || dayIndex + 1)} disabled={regenerating}>{regenerating ? <><Loader2 className="spin" size={13} /> Refreshing day…</> : <><RefreshCw size={13} /> Change this day</>}</button><div className="timeline">{activeDay.activities.map((activity, index) => <ActivityCard activity={activity} city={city} key={`${activity.activityName}-${activity.activityTime}-${index}`} />)}</div></>}
+        {activeDay && <><h2>Day {activeDay.day || dayIndex + 1}{activeDay.dayType === "transfer" ? " · Transfer day" : ""}</h2><button type="button" className="match-link" onClick={() => void regeneratePlan(activeDay.day || dayIndex + 1)} disabled={regenerating}>{regenerating ? <><Loader2 className="spin" size={13} /> Refreshing day…</> : <><RefreshCw size={13} /> Change this day</>}</button><div className="timeline">{(activeDay.activities || []).map((activity, index) => <ActivityCard activity={activity} city={city} key={`${activity.activityName}-${activity.activityTime}-${index}`} />)}</div></>}
       </div>
     </section><FooterSection /></main>;
 }
