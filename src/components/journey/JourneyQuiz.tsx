@@ -897,6 +897,12 @@ export function JourneyQuiz() {
 
   const continueJourney = () => {
     setValidationError("");
+    if (q.kind === "timing" && answers.travel_timing === "flexible") {
+      setValidationError(
+        "Choose a recommended date option before continuing.",
+      );
+      return;
+    }
     if (!validateStep()) return;
     if (step < questions.length - 1) {
       setStep((current) => current + 1);
@@ -1447,7 +1453,13 @@ export function JourneyQuiz() {
             </p>
           )}
         </div>
-        <button className="quiz-continue" onClick={continueJourney}>
+        <button
+          className="quiz-continue"
+          onClick={continueJourney}
+          disabled={
+            q.kind === "timing" && answers.travel_timing === "flexible"
+          }
+        >
           {step === questions.length - 1 ? "See my matches" : "Continue"}{" "}
           <ArrowRight size={15} />
         </button>
