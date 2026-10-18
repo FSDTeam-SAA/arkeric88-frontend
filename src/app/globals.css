@@ -2117,6 +2117,11 @@ footer {
   background: #4c5745;
   transform: translateY(-2px);
 }
+.quiz-continue:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+}
 @keyframes quiz-in {
   from {
     opacity: 0;
